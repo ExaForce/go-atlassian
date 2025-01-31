@@ -18,26 +18,41 @@ type RepositoryPermissionScheme struct {
 	Repository *RepositoryScheme       `json:"repository,omitempty"` // The repository to which the permission applies.
 }
 
+// RepositoryPageScheme represents a paginated list of repositories
+type RepositoryPageScheme struct {
+	Size     int                 `json:"size"`
+	Page     int                 `json:"page"`
+	Pagelen  int                 `json:"pagelen"`
+	Next     string              `json:"next"`
+	Previous string              `json:"previous"`
+	Values   []*RepositoryScheme `json:"values"`
+}
+
 // RepositoryScheme represents a repository.
 type RepositoryScheme struct {
-	Type        string                  `json:"type,omitempty"`        // The type of the repository.
-	UUID        string                  `json:"uuid,omitempty"`        // The unique identifier of the repository.
-	FullName    string                  `json:"full_name,omitempty"`   // The full name of the repository.
-	IsPrivate   bool                    `json:"is_private,omitempty"`  // Indicates if the repository is private.
-	SCM         string                  `json:"scm,omitempty"`         // The source control management system used by the repository.
-	Name        string                  `json:"name,omitempty"`        // The name of the repository.
-	Description string                  `json:"description,omitempty"` // The description of the repository.
-	CreatedOn   string                  `json:"created_on,omitempty"`  // The creation time of the repository.
-	UpdatedOn   string                  `json:"updated_on,omitempty"`  // The update time of the repository.
-	Size        int                     `json:"size,omitempty"`        // The size of the repository.
-	Language    string                  `json:"language,omitempty"`    // The programming language used in the repository.
-	HasIssues   bool                    `json:"has_issues,omitempty"`  // Indicates if the repository has issues enabled.
-	HasWiki     bool                    `json:"has_wiki,omitempty"`    // Indicates if the repository has a wiki enabled.
-	ForkPolicy  string                  `json:"fork_policy,omitempty"` // The fork policy of the repository.
-	Owner       *BitbucketAccountScheme `json:"owner,omitempty"`       // The owner of the repository.
-	Parent      *RepositoryScheme       `json:"parent,omitempty"`      // The parent repository, if the repository is a fork.
-	Project     BitbucketProjectScheme  `json:"project,omitempty"`     // The project to which the repository belongs.
-	Links       *RepositoryLinksScheme  `json:"links,omitempty"`       // A collection of links related to the repository.
+	Type             string                  `json:"type,omitempty"`              // The type of the repository.
+	UUID             string                  `json:"uuid,omitempty"`              // The unique identifier of the repository.
+	FullName         string                  `json:"full_name,omitempty"`         // The full name of the repository.
+	IsPrivate        bool                    `json:"is_private,omitempty"`        // Indicates if the repository is private.
+	SCM              string                  `json:"scm,omitempty"`               // The source control management system used by the repository.
+	Name             string                  `json:"name,omitempty"`              // The name of the repository.
+	Slug             string                  `json:"slug,omitempty"`              // The slug of the repository.
+	Description      string                  `json:"description,omitempty"`       // The description of the repository.
+	Website          string                  `json:"website,omitempty"`           // The website of the repository.
+	CreatedOn        string                  `json:"created_on,omitempty"`        // The creation time of the repository.
+	UpdatedOn        string                  `json:"updated_on,omitempty"`        // The update time of the repository.
+	Size             int                     `json:"size,omitempty"`              // The size of the repository.
+	Language         string                  `json:"language,omitempty"`          // The programming language used in the repository.
+	HasIssues        bool                    `json:"has_issues,omitempty"`        // Indicates if the repository has issues enabled.
+	HasWiki          bool                    `json:"has_wiki,omitempty"`          // Indicates if the repository has a wiki enabled.
+	ForkPolicy       string                  `json:"fork_policy,omitempty"`       // The fork policy of the repository.
+	Owner            *BitbucketAccountScheme `json:"owner,omitempty"`             // The owner of the repository.
+	Workspace        *WorkspaceScheme        `json:"workspace,omitempty"`         // The workspace to which the repository belongs.
+	Parent           *RepositoryScheme       `json:"parent,omitempty"`            // The parent repository, if the repository is a fork.
+	Project          BitbucketProjectScheme  `json:"project,omitempty"`           // The project to which the repository belongs.
+	MainBranch       *MainBranchScheme       `json:"mainbranch,omitempty"`        // The main branch of the repository.
+	OverrideSettings *OverrideSettingsScheme `json:"override_settings,omitempty"` // The override settings of the repository.
+	Links            *RepositoryLinksScheme  `json:"links,omitempty"`             // A collection of links related to the repository.
 }
 
 // RepositoryLinksScheme represents a collection of links related to a repository.
