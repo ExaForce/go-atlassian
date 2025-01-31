@@ -1,4 +1,4 @@
-module github.com/ExaForce/go-atlassian
+module github.com/ctreminiom/go-atlassian/v2
 
 go 1.20
 
