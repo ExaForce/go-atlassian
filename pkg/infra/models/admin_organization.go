@@ -143,10 +143,18 @@ type OrganizationEventOptScheme struct {
 type OrganizationEventPageScheme struct {
 	Data  []*OrganizationEventModelScheme `json:"data,omitempty"`  // The events on this page.
 	Links *LinkPageModelScheme            `json:"links,omitempty"` // Links to other pages.
-	Meta  struct {
-		Next     string `json:"next,omitempty"`      // The next page.
-		PageSize int    `json:"page_size,omitempty"` // The page size.
-	} `json:"meta,omitempty"`
+	Meta  OrganizationEventMetaScheme     `json:"meta,omitempty"`  // Meta data for the page.
+}
+
+type OrganizationEventMetaScheme struct {
+	Attributes interface{} `json:"attributes,omitempty"`  // Attributes of the meta data
+	Next       string      `json:"next,omitempty"`        // Token for the next page
+	Prev       string      `json:"prev,omitempty"`        // Token for the previous page
+	Current    *string     `json:"current,omitempty"`     // Token for the current page
+	PageSize   int         `json:"page_size,omitempty"`   // Number of items per page
+	StartIndex *int        `json:"start_index,omitempty"` // Start index of the current page
+	EndIndex   *int        `json:"end_index,omitempty"`   // End index of the current page
+	Total      int         `json:"total,omitempty"`       // Total number of items
 }
 
 // OrganizationEventModelScheme represents an event in an organization.
@@ -155,6 +163,7 @@ type OrganizationEventModelScheme struct {
 	Type       string                                  `json:"type,omitempty"`       // The type of the event.
 	Attributes *OrganizationEventModelAttributesScheme `json:"attributes,omitempty"` // The attributes of the event.
 	Links      *LinkSelfModelScheme                    `json:"links,omitempty"`      // Links related to the event.
+	Message    *OrganizationEventMessageScheme         `json:"message,omitempty"`    // The message of the event.
 }
 
 // OrganizationEventModelAttributesScheme represents the attributes of an event.
@@ -186,8 +195,17 @@ type OrganizationEventObjectModel struct {
 
 // OrganizationEventLocationModel represents the location of an event.
 type OrganizationEventLocationModel struct {
-	IP  string `json:"ip,omitempty"`  // The IP address of the location.
-	Geo string `json:"geo,omitempty"` // The geographical location.
+	IP          string `json:"ip,omitempty"`          // The IP address of the location.
+	Geo         string `json:"geo,omitempty"`         // The geographical location.
+	CountryName string `json:"countryName,omitempty"` // The country name
+	RegionName  string `json:"regionName,omitempty"`  // The region name
+	City        string `json:"city,omitempty"`        // The city name
+}
+
+// OrganizationEventMessageScheme represents the message of an event
+type OrganizationEventMessageScheme struct {
+	Content string `json:"content,omitempty"` // The content of the message
+	Format  string `json:"format,omitempty"`  // The format of the message
 }
 
 // OrganizationEventScheme represents an event.
