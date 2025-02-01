@@ -1287,7 +1287,7 @@ func Test_internalOrganizationImpl_SearchWorkspaces(t *testing.T) {
 				client.On("NewRequest",
 					context.Background(),
 					http.MethodPost,
-					"v2/orgs/organization-sample-uuid/workspaces",
+					"admin/v2/orgs/organization-sample-uuid/workspaces",
 					"",
 					&model.WorkspaceSearchParams{
 						Limit: 50,
@@ -1337,7 +1337,7 @@ func Test_internalOrganizationImpl_SearchWorkspaces(t *testing.T) {
 				client.On("NewRequest",
 					context.Background(),
 					http.MethodPost,
-					"v2/orgs/organization-sample-uuid/workspaces",
+					"admin/v2/orgs/organization-sample-uuid/workspaces",
 					"",
 					&model.WorkspaceSearchParams{
 						Limit: 50,
@@ -1365,7 +1365,7 @@ func Test_internalOrganizationImpl_SearchWorkspaces(t *testing.T) {
 				client.On("NewRequest",
 					context.Background(),
 					http.MethodPost,
-					"v2/orgs/organization-sample-uuid/workspaces",
+					"admin/v2/orgs/organization-sample-uuid/workspaces",
 					"",
 					&model.WorkspaceSearchParams{
 						Limit: 50,

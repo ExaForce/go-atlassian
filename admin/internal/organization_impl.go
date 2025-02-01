@@ -410,7 +410,7 @@ func (i *internalOrganizationImpl) SearchWorkspaces(ctx context.Context, organiz
 		return nil, nil, model.ErrNoAdminOrganization
 	}
 
-	endpoint := fmt.Sprintf("v2/orgs/%v/workspaces", organizationID)
+	endpoint := fmt.Sprintf("admin/v2/orgs/%v/workspaces", organizationID)
 
 	req, err := i.c.NewRequest(ctx, http.MethodPost, endpoint, "", payload)
 	if err != nil {
