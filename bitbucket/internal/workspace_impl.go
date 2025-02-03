@@ -25,6 +25,7 @@ type WorkspaceService struct {
 	internalClient bitbucket.WorkspaceConnector
 	Hook           *WorkspaceHookService
 	Permission     *WorkspacePermissionService
+	Repository     *RepositoryService
 }
 
 // Get returns the requested workspace.
