@@ -48,6 +48,7 @@ func New(httpClient common.HTTPClient, site string) (*Client, error) {
 	client.Workspace = internal.NewWorkspaceService(client,
 		internal.NewWorkspaceHookService(client),
 		internal.NewWorkspacePermissionService(client),
+		internal.NewRepositoryService(client),
 	)
 
 	return client, nil
