@@ -43,7 +43,7 @@ type RepositoryConnector interface {
 	// Watchers(ctx context.Context, workspace, repoSlug string)
 
 	List(ctx context.Context, workspace string) (*models.RepositoryPageScheme, *models.ResponseScheme, error)
-	ListBranchRestrictions(ctx context.Context, workspace, repoSlug string) (*models.BranchRestrictionsPageScheme, *models.ResponseScheme, error)
+	ListBranchRestrictions(ctx context.Context, workspace, repoSlug string, pageOptions models.PageOptions) (*models.BranchRestrictionsPageScheme, *models.ResponseScheme, error)
 	ListDefaultReviewers(ctx context.Context, workspace, repoSlug string) (*models.DefaultReviewersPageScheme, *models.ResponseScheme, error)
 	ListPullRequests(ctx context.Context, workspace, repoSlug string) (*models.PullRequestsResponse, *models.ResponseScheme, error)
 }

@@ -131,9 +131,10 @@ func TestRepositoryService_List(t *testing.T) {
 
 func TestRepositoryService_ListBranchRestrictions(t *testing.T) {
 	type args struct {
-		ctx       context.Context
-		workspace string
-		repoSlug  string
+		ctx         context.Context
+		workspace   string
+		repoSlug    string
+		pageOptions models.PageOptions
 	}
 
 	testCases := []struct {
@@ -251,7 +252,7 @@ func TestRepositoryService_ListBranchRestrictions(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			client, _ := testCase.on(t)
 
-			gotResult, gotResponse, err := client.ListBranchRestrictions(testCase.args.ctx, testCase.args.workspace, testCase.args.repoSlug)
+			gotResult, gotResponse, err := client.ListBranchRestrictions(testCase.args.ctx, testCase.args.workspace, testCase.args.repoSlug, testCase.args.pageOptions)
 
 			if testCase.wantErr {
 				assert.Error(t, err)

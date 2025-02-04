@@ -97,11 +97,11 @@ func (r *RepositoryService) Create(ctx context.Context, workspace string, reposi
 // GET /2.0/repositories/{workspace}/{repo_slug}/branch-restrictions
 //
 // https://developer.atlassian.com/cloud/bitbucket/rest/api-group-branch-restrictions/#api-repositories-workspace-repo-slug-branch-restrictions-get
-func (r *RepositoryService) ListBranchRestrictions(ctx context.Context, workspace, repoSlug string) (*model.BranchRestrictionsPageScheme, *model.ResponseScheme, error) {
-	return r.internalClient.ListBranchRestrictions(ctx, workspace, repoSlug)
+func (r *RepositoryService) ListBranchRestrictions(ctx context.Context, workspace, repoSlug string, pageOptions model.PageOptions) (*model.BranchRestrictionsPageScheme, *model.ResponseScheme, error) {
+	return r.internalClient.ListBranchRestrictions(ctx, workspace, repoSlug, pageOptions)
 }
 
-func (i *internalRepositoryServiceImpl) ListBranchRestrictions(ctx context.Context, workspace, repoSlug string) (*model.BranchRestrictionsPageScheme, *model.ResponseScheme, error) {
+func (i *internalRepositoryServiceImpl) ListBranchRestrictions(ctx context.Context, workspace, repoSlug string, pageOptions model.PageOptions) (*model.BranchRestrictionsPageScheme, *model.ResponseScheme, error) {
 	if workspace == "" {
 		return nil, nil, model.ErrNoWorkspace
 	}
@@ -111,6 +111,16 @@ func (i *internalRepositoryServiceImpl) ListBranchRestrictions(ctx context.Conte
 	}
 
 	endpoint := fmt.Sprintf("2.0/repositories/%v/%v/branch-restrictions", workspace, repoSlug)
+
+	if pageOptions.Page != 0 || pageOptions.Pagelen != 0 {
+		if pageOptions.Pagelen == 0 {
+			endpoint = fmt.Sprintf("%s?page=%d", endpoint, pageOptions.Page)
+		} else if pageOptions.Page == 0 {
+			endpoint = fmt.Sprintf("%s?pagelen=%d", endpoint, pageOptions.Pagelen)
+		} else {
+			endpoint = fmt.Sprintf("%s?pagelen=%d&page=%d", endpoint, pageOptions.Pagelen, pageOptions.Page)
+		}
+	}
 
 	request, err := i.c.NewRequest(ctx, http.MethodGet, endpoint, "", nil)
 	if err != nil {
