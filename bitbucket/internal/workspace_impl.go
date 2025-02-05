@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	model "github.com/ctreminiom/go-atlassian/v2/pkg/infra/models"
+	"github.com/ctreminiom/go-atlassian/v2/pkg/infra/utils"
 	"github.com/ctreminiom/go-atlassian/v2/service"
 	"github.com/ctreminiom/go-atlassian/v2/service/bitbucket"
 )
@@ -29,22 +30,20 @@ type WorkspaceService struct {
 	Repository     *RepositoryService
 }
 
-// Get returns the requested workspace.
+// Get returns the requested workspace with pagination support.
 //
 // GET /2.0/workspaces/{workspace}
 //
 // https://docs.go-atlassian.io/bitbucket-cloud/workspace#get-a-workspace
-func (w *WorkspaceService) Get(ctx context.Context, workspace string) (*model.WorkspaceScheme, *model.ResponseScheme, error) {
-	return w.internalClient.Get(ctx, workspace)
+func (w *WorkspaceService) Get(ctx context.Context, workspace string, opts *model.PageOptions) (*model.WorkspaceScheme, *model.ResponseScheme, error) {
+	return w.internalClient.Get(ctx, workspace, opts)
 }
 
-// Members returns all members of the requested workspace.
+// Members returns all members of the requested workspace with pagination support.
 //
 // GET /2.0/workspaces/{workspace}/members
-//
-// https://docs.go-atlassian.io/bitbucket-cloud/workspace#get-a-workspace
-func (w *WorkspaceService) Members(ctx context.Context, workspace string) (*model.WorkspaceMembershipPageScheme, *model.ResponseScheme, error) {
-	return w.internalClient.Members(ctx, workspace)
+func (w *WorkspaceService) Members(ctx context.Context, workspace string, opts *model.PageOptions) (*model.WorkspaceMembershipPageScheme, *model.ResponseScheme, error) {
+	return w.internalClient.Members(ctx, workspace, opts)
 }
 
 // Membership returns the workspace membership.
@@ -58,21 +57,19 @@ func (w *WorkspaceService) Membership(ctx context.Context, workspace, memberID s
 	return w.internalClient.Membership(ctx, workspace, memberID)
 }
 
-// Projects returns the list of projects in this workspace.
+// Projects returns the list of projects in this workspace with pagination support.
 //
 // GET /2.0/workspaces/{workspace}/projects
-//
-// https://docs.go-atlassian.io/bitbucket-cloud/workspace#get-projects-in-a-workspace
-func (w *WorkspaceService) Projects(ctx context.Context, workspace string) (*model.BitbucketProjectPageScheme, *model.ResponseScheme, error) {
-	return w.internalClient.Projects(ctx, workspace)
+func (w *WorkspaceService) Projects(ctx context.Context, workspace string, opts *model.PageOptions) (*model.BitbucketProjectPageScheme, *model.ResponseScheme, error) {
+	return w.internalClient.Projects(ctx, workspace, opts)
 }
 
 type internalWorkspaceServiceImpl struct {
 	c service.Connector
 }
 
-// Get returns the requested workspace.
-func (i *internalWorkspaceServiceImpl) Get(ctx context.Context, workspace string) (*model.WorkspaceScheme, *model.ResponseScheme, error) {
+// Get returns the requested workspace with pagination support.
+func (i *internalWorkspaceServiceImpl) Get(ctx context.Context, workspace string, opts *model.PageOptions) (*model.WorkspaceScheme, *model.ResponseScheme, error) {
 
 	if workspace == "" {
 		return nil, nil, model.ErrNoWorkspace
@@ -80,41 +77,52 @@ func (i *internalWorkspaceServiceImpl) Get(ctx context.Context, workspace string
 
 	endpoint := fmt.Sprintf("2.0/workspaces/%v", workspace)
 
-	request, err := i.c.NewRequest(ctx, http.MethodGet, endpoint, "", nil)
+	urlStr, err := utils.AddPaginationParams(endpoint, opts)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	result := new(model.WorkspaceScheme)
-	response, err := i.c.Call(request, result)
+	request, err := i.c.NewRequest(ctx, http.MethodGet, urlStr, "", nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	ws := new(model.WorkspaceScheme)
+	response, err := i.c.Call(request, ws)
 	if err != nil {
 		return nil, response, err
 	}
 
-	return result, response, nil
+	return ws, response, nil
 }
 
-// Members returns all members of the requested workspace.
-func (i *internalWorkspaceServiceImpl) Members(ctx context.Context, workspace string) (*model.WorkspaceMembershipPageScheme, *model.ResponseScheme, error) {
-
+// Members returns all members of the requested workspace with pagination support.
+//
+// GET /2.0/workspaces/{workspace}/members
+func (i *internalWorkspaceServiceImpl) Members(ctx context.Context, workspace string, opts *model.PageOptions) (*model.WorkspaceMembershipPageScheme, *model.ResponseScheme, error) {
 	if workspace == "" {
 		return nil, nil, model.ErrNoWorkspace
 	}
 
 	endpoint := fmt.Sprintf("2.0/workspaces/%v/members", workspace)
 
-	request, err := i.c.NewRequest(ctx, http.MethodGet, endpoint, "", nil)
+	urlStr, err := utils.AddPaginationParams(endpoint, opts)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	page := new(model.WorkspaceMembershipPageScheme)
-	response, err := i.c.Call(request, page)
+	request, err := i.c.NewRequest(ctx, http.MethodGet, urlStr, "", nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	members := new(model.WorkspaceMembershipPageScheme)
+	response, err := i.c.Call(request, members)
 	if err != nil {
 		return nil, response, err
 	}
 
-	return page, response, nil
+	return members, response, nil
 }
 
 // Membership returns the workspace membership.
@@ -144,25 +152,29 @@ func (i *internalWorkspaceServiceImpl) Membership(ctx context.Context, workspace
 	return member, response, nil
 }
 
-// Projects returns the list of projects in this workspace.
-func (i *internalWorkspaceServiceImpl) Projects(ctx context.Context, workspace string) (*model.BitbucketProjectPageScheme, *model.ResponseScheme, error) {
-
+// Projects returns the list of projects in this workspace with pagination support.
+func (i *internalWorkspaceServiceImpl) Projects(ctx context.Context, workspace string, opts *model.PageOptions) (*model.BitbucketProjectPageScheme, *model.ResponseScheme, error) {
 	if workspace == "" {
 		return nil, nil, model.ErrNoWorkspace
 	}
 
 	endpoint := fmt.Sprintf("2.0/workspaces/%v/projects", workspace)
 
-	request, err := i.c.NewRequest(ctx, http.MethodGet, endpoint, "", nil)
+	urlStr, err := utils.AddPaginationParams(endpoint, opts)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	page := new(model.BitbucketProjectPageScheme)
-	response, err := i.c.Call(request, page)
+	request, err := i.c.NewRequest(ctx, http.MethodGet, urlStr, "", nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	projects := new(model.BitbucketProjectPageScheme)
+	response, err := i.c.Call(request, projects)
 	if err != nil {
 		return nil, response, err
 	}
 
-	return page, response, nil
+	return projects, response, nil
 }

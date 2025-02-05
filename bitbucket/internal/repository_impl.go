@@ -8,6 +8,7 @@ import (
 
 	"github.com/ctreminiom/go-atlassian/v2/pkg/infra/models"
 	model "github.com/ctreminiom/go-atlassian/v2/pkg/infra/models"
+	"github.com/ctreminiom/go-atlassian/v2/pkg/infra/utils"
 	"github.com/ctreminiom/go-atlassian/v2/service"
 	"github.com/ctreminiom/go-atlassian/v2/service/bitbucket"
 )
@@ -29,8 +30,8 @@ type RepositoryService struct {
 // GET /2.0/repositories/{workspace}
 //
 // https://developer.atlassian.com/cloud/bitbucket/rest/api-group-repositories/#api-repositories-workspace-get
-func (r *RepositoryService) List(ctx context.Context, workspace string) (*model.RepositoryPageScheme, *model.ResponseScheme, error) {
-	return r.internalClient.List(ctx, workspace)
+func (r *RepositoryService) List(ctx context.Context, workspace string, opts *model.PageOptions) (*model.RepositoryPageScheme, *model.ResponseScheme, error) {
+	return r.internalClient.List(ctx, workspace, opts)
 }
 
 type internalRepositoryServiceImpl struct {
@@ -38,14 +39,20 @@ type internalRepositoryServiceImpl struct {
 }
 
 // List returns a paginated list of all repositories owned by the specified workspace
-func (i *internalRepositoryServiceImpl) List(ctx context.Context, workspace string) (*model.RepositoryPageScheme, *model.ResponseScheme, error) {
+func (i *internalRepositoryServiceImpl) List(ctx context.Context, workspace string, opts *model.PageOptions) (*model.RepositoryPageScheme, *model.ResponseScheme, error) {
 	if workspace == "" {
 		return nil, nil, model.ErrNoWorkspace
 	}
 
 	endpoint := fmt.Sprintf("2.0/repositories/%v", workspace)
 
-	request, err := i.c.NewRequest(ctx, http.MethodGet, endpoint, "", nil)
+	// Add pagination parameters
+	urlStr, err := utils.AddPaginationParams(endpoint, opts)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	request, err := i.c.NewRequest(ctx, http.MethodGet, urlStr, "", nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -97,11 +104,11 @@ func (r *RepositoryService) Create(ctx context.Context, workspace string, reposi
 // GET /2.0/repositories/{workspace}/{repo_slug}/branch-restrictions
 //
 // https://developer.atlassian.com/cloud/bitbucket/rest/api-group-branch-restrictions/#api-repositories-workspace-repo-slug-branch-restrictions-get
-func (r *RepositoryService) ListBranchRestrictions(ctx context.Context, workspace, repoSlug string) (*model.BranchRestrictionsPageScheme, *model.ResponseScheme, error) {
-	return r.internalClient.ListBranchRestrictions(ctx, workspace, repoSlug)
+func (r *RepositoryService) ListBranchRestrictions(ctx context.Context, workspace, repoSlug string, opts *model.PageOptions) (*model.BranchRestrictionsPageScheme, *model.ResponseScheme, error) {
+	return r.internalClient.ListBranchRestrictions(ctx, workspace, repoSlug, opts)
 }
 
-func (i *internalRepositoryServiceImpl) ListBranchRestrictions(ctx context.Context, workspace, repoSlug string) (*model.BranchRestrictionsPageScheme, *model.ResponseScheme, error) {
+func (i *internalRepositoryServiceImpl) ListBranchRestrictions(ctx context.Context, workspace, repoSlug string, opts *model.PageOptions) (*model.BranchRestrictionsPageScheme, *model.ResponseScheme, error) {
 	if workspace == "" {
 		return nil, nil, model.ErrNoWorkspace
 	}
@@ -112,7 +119,13 @@ func (i *internalRepositoryServiceImpl) ListBranchRestrictions(ctx context.Conte
 
 	endpoint := fmt.Sprintf("2.0/repositories/%v/%v/branch-restrictions", workspace, repoSlug)
 
-	request, err := i.c.NewRequest(ctx, http.MethodGet, endpoint, "", nil)
+	// Add pagination parameters
+	urlStr, err := utils.AddPaginationParams(endpoint, opts)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	request, err := i.c.NewRequest(ctx, http.MethodGet, urlStr, "", nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -131,11 +144,11 @@ func (i *internalRepositoryServiceImpl) ListBranchRestrictions(ctx context.Conte
 // GET /2.0/repositories/{workspace}/{repo_slug}/default-reviewers
 //
 // https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pullrequests/#api-repositories-workspace-repo-slug-default-reviewers-get
-func (r *RepositoryService) ListDefaultReviewers(ctx context.Context, workspace, repoSlug string) (*model.DefaultReviewersPageScheme, *model.ResponseScheme, error) {
-	return r.internalClient.ListDefaultReviewers(ctx, workspace, repoSlug)
+func (r *RepositoryService) ListDefaultReviewers(ctx context.Context, workspace, repoSlug string, opts *model.PageOptions) (*model.DefaultReviewersPageScheme, *model.ResponseScheme, error) {
+	return r.internalClient.ListDefaultReviewers(ctx, workspace, repoSlug, opts)
 }
 
-func (i *internalRepositoryServiceImpl) ListDefaultReviewers(ctx context.Context, workspace, repoSlug string) (*model.DefaultReviewersPageScheme, *model.ResponseScheme, error) {
+func (i *internalRepositoryServiceImpl) ListDefaultReviewers(ctx context.Context, workspace, repoSlug string, opts *model.PageOptions) (*model.DefaultReviewersPageScheme, *model.ResponseScheme, error) {
 	if workspace == "" {
 		return nil, nil, model.ErrNoWorkspace
 	}
@@ -146,7 +159,13 @@ func (i *internalRepositoryServiceImpl) ListDefaultReviewers(ctx context.Context
 
 	endpoint := fmt.Sprintf("2.0/repositories/%v/%v/default-reviewers", workspace, repoSlug)
 
-	request, err := i.c.NewRequest(ctx, http.MethodGet, endpoint, "", nil)
+	// Add pagination parameters
+	urlStr, err := utils.AddPaginationParams(endpoint, opts)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	request, err := i.c.NewRequest(ctx, http.MethodGet, urlStr, "", nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -165,11 +184,11 @@ func (i *internalRepositoryServiceImpl) ListDefaultReviewers(ctx context.Context
 // GET /2.0/repositories/{workspace}/{repo_slug}/pullrequests
 //
 // https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pullrequests/#api-repositories-workspace-repo-slug-pullrequests-get
-func (r *RepositoryService) ListPullRequests(ctx context.Context, workspace, repoSlug string) (*models.PullRequestsResponse, *models.ResponseScheme, error) {
-	return r.internalClient.ListPullRequests(ctx, workspace, repoSlug)
+func (r *RepositoryService) ListPullRequests(ctx context.Context, workspace, repoSlug string, opts *model.PageOptions) (*models.PullRequestsResponse, *models.ResponseScheme, error) {
+	return r.internalClient.ListPullRequests(ctx, workspace, repoSlug, opts)
 }
 
-func (i *internalRepositoryServiceImpl) ListPullRequests(ctx context.Context, workspace, repoSlug string) (*models.PullRequestsResponse, *models.ResponseScheme, error) {
+func (i *internalRepositoryServiceImpl) ListPullRequests(ctx context.Context, workspace, repoSlug string, opts *model.PageOptions) (*models.PullRequestsResponse, *models.ResponseScheme, error) {
 	if workspace == "" {
 		return nil, nil, models.ErrNoWorkspace
 	}
@@ -180,13 +199,20 @@ func (i *internalRepositoryServiceImpl) ListPullRequests(ctx context.Context, wo
 
 	endpoint := fmt.Sprintf("2.0/repositories/%v/%v/pullrequests", workspace, repoSlug)
 
-	// Add all states to query parameters
-	u, err := url.Parse(endpoint)
+	// Add pagination parameters first
+	urlStr, err := utils.AddPaginationParams(endpoint, opts)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	q := url.Values{}
+	// Parse URL to add additional parameters
+	u, err := url.Parse(urlStr)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Add state parameters
+	q := u.Query()
 	q.Add("state", "OPEN,MERGED,DECLINED,SUPERSEDED")
 	u.RawQuery = q.Encode()
 

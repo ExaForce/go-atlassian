@@ -3,12 +3,13 @@ package internal
 import (
 	"context"
 	"errors"
+	"net/http"
+	"testing"
+
 	model "github.com/ctreminiom/go-atlassian/v2/pkg/infra/models"
 	"github.com/ctreminiom/go-atlassian/v2/service"
 	"github.com/ctreminiom/go-atlassian/v2/service/mocks"
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"testing"
 )
 
 func Test_internalWorkspacePermissionServiceImpl_Members(t *testing.T) {
@@ -21,6 +22,7 @@ func Test_internalWorkspacePermissionServiceImpl_Members(t *testing.T) {
 		ctx       context.Context
 		workspace string
 		query     string
+		opts      *model.PageOptions
 	}
 
 	testCases := []struct {
@@ -37,6 +39,7 @@ func Test_internalWorkspacePermissionServiceImpl_Members(t *testing.T) {
 				ctx:       context.Background(),
 				workspace: "work-space-name-sample",
 				query:     "permission=\"owner\"",
+				opts:      &model.PageOptions{Page: 1, PageLen: 10},
 			},
 			on: func(fields *fields) {
 
@@ -45,7 +48,7 @@ func Test_internalWorkspacePermissionServiceImpl_Members(t *testing.T) {
 				client.On("NewRequest",
 					context.Background(),
 					http.MethodGet,
-					"2.0/workspaces/work-space-name-sample/permissions?q=permission%3D%22owner%22",
+					"2.0/workspaces/work-space-name-sample/permissions?page=1&pagelen=10&q=permission%3D%22owner%22",
 					"", nil).
 					Return(&http.Request{}, nil)
 
@@ -64,6 +67,7 @@ func Test_internalWorkspacePermissionServiceImpl_Members(t *testing.T) {
 				ctx:       context.Background(),
 				workspace: "work-space-name-sample",
 				query:     "permission=\"owner\"",
+				opts:      &model.PageOptions{Page: 1, PageLen: 20},
 			},
 			on: func(fields *fields) {
 
@@ -72,7 +76,7 @@ func Test_internalWorkspacePermissionServiceImpl_Members(t *testing.T) {
 				client.On("NewRequest",
 					context.Background(),
 					http.MethodGet,
-					"2.0/workspaces/work-space-name-sample/permissions?q=permission%3D%22owner%22",
+					"2.0/workspaces/work-space-name-sample/permissions?page=1&pagelen=20&q=permission%3D%22owner%22",
 					"", nil).
 					Return(&http.Request{}, errors.New("error, unable to create the http request"))
 
@@ -103,7 +107,7 @@ func Test_internalWorkspacePermissionServiceImpl_Members(t *testing.T) {
 
 			newService := NewWorkspacePermissionService(testCase.fields.c)
 
-			gotResult, gotResponse, err := newService.Members(testCase.args.ctx, testCase.args.workspace, testCase.args.query)
+			gotResult, gotResponse, err := newService.Members(testCase.args.ctx, testCase.args.workspace, testCase.args.query, testCase.args.opts)
 
 			if testCase.wantErr {
 
@@ -134,6 +138,7 @@ func Test_internalWorkspacePermissionServiceImpl_Repositories(t *testing.T) {
 		workspace string
 		query     string
 		sort      string
+		opts      *model.PageOptions
 	}
 
 	testCases := []struct {
@@ -151,6 +156,7 @@ func Test_internalWorkspacePermissionServiceImpl_Repositories(t *testing.T) {
 				workspace: "work-space-name-sample",
 				query:     "permission=\"owner\"",
 				sort:      "user.display_name",
+				opts:      &model.PageOptions{Page: 1, PageLen: 10},
 			},
 			on: func(fields *fields) {
 
@@ -159,7 +165,7 @@ func Test_internalWorkspacePermissionServiceImpl_Repositories(t *testing.T) {
 				client.On("NewRequest",
 					context.Background(),
 					http.MethodGet,
-					"2.0/workspaces/work-space-name-sample/permissions/repositories?q=permission%3D%22owner%22&sort=user.display_name",
+					"2.0/workspaces/work-space-name-sample/permissions/repositories?page=1&pagelen=10&q=permission%3D%22owner%22&sort=user.display_name",
 					"", nil).
 					Return(&http.Request{}, nil)
 
@@ -179,6 +185,7 @@ func Test_internalWorkspacePermissionServiceImpl_Repositories(t *testing.T) {
 				workspace: "work-space-name-sample",
 				query:     "permission=\"owner\"",
 				sort:      "user.display_name",
+				opts:      &model.PageOptions{Page: 1, PageLen: 10},
 			},
 			on: func(fields *fields) {
 
@@ -187,7 +194,7 @@ func Test_internalWorkspacePermissionServiceImpl_Repositories(t *testing.T) {
 				client.On("NewRequest",
 					context.Background(),
 					http.MethodGet,
-					"2.0/workspaces/work-space-name-sample/permissions/repositories?q=permission%3D%22owner%22&sort=user.display_name",
+					"2.0/workspaces/work-space-name-sample/permissions/repositories?page=1&pagelen=10&q=permission%3D%22owner%22&sort=user.display_name",
 					"", nil).
 					Return(&http.Request{}, errors.New("error, unable to create the http request"))
 
@@ -219,7 +226,7 @@ func Test_internalWorkspacePermissionServiceImpl_Repositories(t *testing.T) {
 			newService := NewWorkspacePermissionService(testCase.fields.c)
 
 			gotResult, gotResponse, err := newService.Repositories(testCase.args.ctx, testCase.args.workspace, testCase.args.query,
-				testCase.args.sort)
+				testCase.args.sort, testCase.args.opts)
 
 			if testCase.wantErr {
 
