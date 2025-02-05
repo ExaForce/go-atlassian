@@ -16,6 +16,7 @@ func TestRepositoryService_List(t *testing.T) {
 	type args struct {
 		ctx       context.Context
 		workspace string
+		opts      *models.PageOptions
 	}
 
 	testCases := []struct {
@@ -83,6 +84,7 @@ func TestRepositoryService_List(t *testing.T) {
 			args: args{
 				ctx:       context.Background(),
 				workspace: "workspace-uuid",
+				opts:      &models.PageOptions{Page: 1, PageLen: 20},
 			},
 			on: func(t *testing.T) (*RepositoryService, *models.ResponseScheme) {
 				client := NewRepositoryService(testConnector{
@@ -95,7 +97,7 @@ func TestRepositoryService_List(t *testing.T) {
 					},
 					requestMaker: func(ctx context.Context, method, path, query string, body interface{}) (*http.Request, error) {
 						assert.Equal(t, "GET", method)
-						assert.Equal(t, "2.0/repositories/workspace-uuid", path)
+						assert.Equal(t, "2.0/repositories/workspace-uuid?page=1&pagelen=20", path)
 						return &http.Request{}, nil
 					},
 				})
@@ -115,7 +117,7 @@ func TestRepositoryService_List(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			client, _ := testCase.on(t)
 
-			gotResult, gotResponse, err := client.List(testCase.args.ctx, testCase.args.workspace)
+			gotResult, gotResponse, err := client.List(testCase.args.ctx, testCase.args.workspace, testCase.args.opts)
 
 			if testCase.wantErr {
 				assert.Error(t, err)
@@ -134,6 +136,7 @@ func TestRepositoryService_ListBranchRestrictions(t *testing.T) {
 		ctx       context.Context
 		workspace string
 		repoSlug  string
+		opts      *models.PageOptions
 	}
 
 	testCases := []struct {
@@ -219,6 +222,7 @@ func TestRepositoryService_ListBranchRestrictions(t *testing.T) {
 				ctx:       context.Background(),
 				workspace: "workspace-uuid",
 				repoSlug:  "repo-slug",
+				opts:      &models.PageOptions{Page: 1, PageLen: 20},
 			},
 			on: func(t *testing.T) (*RepositoryService, *models.ResponseScheme) {
 				client := NewRepositoryService(testConnector{
@@ -231,7 +235,7 @@ func TestRepositoryService_ListBranchRestrictions(t *testing.T) {
 					},
 					requestMaker: func(ctx context.Context, method, path, query string, body interface{}) (*http.Request, error) {
 						assert.Equal(t, "GET", method)
-						assert.Equal(t, "2.0/repositories/workspace-uuid/repo-slug/branch-restrictions", path)
+						assert.Equal(t, "2.0/repositories/workspace-uuid/repo-slug/branch-restrictions?page=1&pagelen=20", path)
 						return &http.Request{}, nil
 					},
 				})
@@ -251,7 +255,7 @@ func TestRepositoryService_ListBranchRestrictions(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			client, _ := testCase.on(t)
 
-			gotResult, gotResponse, err := client.ListBranchRestrictions(testCase.args.ctx, testCase.args.workspace, testCase.args.repoSlug)
+			gotResult, gotResponse, err := client.ListBranchRestrictions(testCase.args.ctx, testCase.args.workspace, testCase.args.repoSlug, testCase.args.opts)
 
 			if testCase.wantErr {
 				assert.Error(t, err)
@@ -270,6 +274,7 @@ func TestRepositoryService_ListDefaultReviewers(t *testing.T) {
 		ctx       context.Context
 		workspace string
 		repoSlug  string
+		opts      *models.PageOptions
 	}
 
 	testCases := []struct {
@@ -355,6 +360,7 @@ func TestRepositoryService_ListDefaultReviewers(t *testing.T) {
 				ctx:       context.Background(),
 				workspace: "workspace-uuid",
 				repoSlug:  "repo-slug",
+				opts:      &models.PageOptions{Page: 1, PageLen: 20},
 			},
 			on: func(t *testing.T) (*RepositoryService, *models.ResponseScheme) {
 				client := NewRepositoryService(testConnector{
@@ -367,7 +373,7 @@ func TestRepositoryService_ListDefaultReviewers(t *testing.T) {
 					},
 					requestMaker: func(ctx context.Context, method, path, query string, body interface{}) (*http.Request, error) {
 						assert.Equal(t, "GET", method)
-						assert.Equal(t, "2.0/repositories/workspace-uuid/repo-slug/default-reviewers", path)
+						assert.Equal(t, "2.0/repositories/workspace-uuid/repo-slug/default-reviewers?page=1&pagelen=20", path)
 						return &http.Request{}, nil
 					},
 				})
@@ -387,7 +393,7 @@ func TestRepositoryService_ListDefaultReviewers(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			client, _ := testCase.on(t)
 
-			gotResult, gotResponse, err := client.ListDefaultReviewers(testCase.args.ctx, testCase.args.workspace, testCase.args.repoSlug)
+			gotResult, gotResponse, err := client.ListDefaultReviewers(testCase.args.ctx, testCase.args.workspace, testCase.args.repoSlug, testCase.args.opts)
 
 			if testCase.wantErr {
 				assert.Error(t, err)
@@ -406,6 +412,7 @@ func TestRepositoryService_ListPullRequests(t *testing.T) {
 		ctx       context.Context
 		workspace string
 		repoSlug  string
+		opts      *models.PageOptions
 	}
 
 	testCases := []struct {
@@ -491,6 +498,7 @@ func TestRepositoryService_ListPullRequests(t *testing.T) {
 				ctx:       context.Background(),
 				workspace: "workspace-uuid",
 				repoSlug:  "repo-slug",
+				opts:      &models.PageOptions{Page: 1, PageLen: 20},
 			},
 			on: func(t *testing.T) (*RepositoryService, *models.ResponseScheme) {
 				client := NewRepositoryService(testConnector{
@@ -503,7 +511,7 @@ func TestRepositoryService_ListPullRequests(t *testing.T) {
 					},
 					requestMaker: func(ctx context.Context, method, path, query string, body interface{}) (*http.Request, error) {
 						assert.Equal(t, "GET", method)
-						assert.Equal(t, "2.0/repositories/workspace-uuid/repo-slug/pullrequests?state=OPEN%2CMERGED%2CDECLINED%2CSUPERSEDED", path)
+						assert.Equal(t, "2.0/repositories/workspace-uuid/repo-slug/pullrequests?page=1&pagelen=20&state=OPEN%2CMERGED%2CDECLINED%2CSUPERSEDED", path)
 
 						// Verify query parameters
 						u, err := url.Parse(query)
@@ -529,7 +537,7 @@ func TestRepositoryService_ListPullRequests(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			client, _ := testCase.on(t)
 
-			gotResult, gotResponse, err := client.ListPullRequests(testCase.args.ctx, testCase.args.workspace, testCase.args.repoSlug)
+			gotResult, gotResponse, err := client.ListPullRequests(testCase.args.ctx, testCase.args.workspace, testCase.args.repoSlug, testCase.args.opts)
 
 			if testCase.wantErr {
 				assert.Error(t, err)

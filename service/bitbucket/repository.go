@@ -42,10 +42,10 @@ type RepositoryConnector interface {
 	// // GET /2.0/repositories/{workspace}/{repo_slug}/watchers
 	// Watchers(ctx context.Context, workspace, repoSlug string)
 
-	List(ctx context.Context, workspace string) (*models.RepositoryPageScheme, *models.ResponseScheme, error)
-	ListBranchRestrictions(ctx context.Context, workspace, repoSlug string) (*models.BranchRestrictionsPageScheme, *models.ResponseScheme, error)
-	ListDefaultReviewers(ctx context.Context, workspace, repoSlug string) (*models.DefaultReviewersPageScheme, *models.ResponseScheme, error)
-	ListPullRequests(ctx context.Context, workspace, repoSlug string) (*models.PullRequestsResponse, *models.ResponseScheme, error)
+	List(ctx context.Context, workspace string, opts *models.PageOptions) (*models.RepositoryPageScheme, *models.ResponseScheme, error)
+	ListBranchRestrictions(ctx context.Context, workspace, repoSlug string, opts *models.PageOptions) (*models.BranchRestrictionsPageScheme, *models.ResponseScheme, error)
+	ListDefaultReviewers(ctx context.Context, workspace, repoSlug string, opts *models.PageOptions) (*models.DefaultReviewersPageScheme, *models.ResponseScheme, error)
+	ListPullRequests(ctx context.Context, workspace, repoSlug string, opts *models.PageOptions) (*models.PullRequestsResponse, *models.ResponseScheme, error)
 }
 
 // RepositoryForkConnector represents the Bitbucket Cloud repository forks.

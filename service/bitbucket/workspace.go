@@ -18,14 +18,14 @@ type WorkspaceConnector interface {
 	// GET /2.0/workspaces/{workspace}
 	//
 	// https://docs.go-atlassian.io/bitbucket-cloud/workspace#get-a-workspace
-	Get(ctx context.Context, workspace string) (*models.WorkspaceScheme, *models.ResponseScheme, error)
+	Get(ctx context.Context, workspace string, opts *models.PageOptions) (*models.WorkspaceScheme, *models.ResponseScheme, error)
 
 	// Members returns all members of the requested workspace.
 	//
 	// GET /2.0/workspaces/{workspace}/members
 	//
 	// https://docs.go-atlassian.io/bitbucket-cloud/workspace#get-a-workspace
-	Members(ctx context.Context, workspace string) (*models.WorkspaceMembershipPageScheme, *models.ResponseScheme, error)
+	Members(ctx context.Context, workspace string, opts *models.PageOptions) (*models.WorkspaceMembershipPageScheme, *models.ResponseScheme, error)
 
 	// Membership returns the workspace membership,
 	//
@@ -41,7 +41,7 @@ type WorkspaceConnector interface {
 	// GET /2.0/workspaces/{workspace}/projects
 	//
 	// https://docs.go-atlassian.io/bitbucket-cloud/workspace#get-projects-in-a-workspace
-	Projects(ctx context.Context, workspace string) (*models.BitbucketProjectPageScheme, *models.ResponseScheme, error)
+	Projects(ctx context.Context, workspace string, opts *models.PageOptions) (*models.BitbucketProjectPageScheme, *models.ResponseScheme, error)
 }
 
 // WorkspaceHookConnector is where you can manage the workspace webhook connector
@@ -97,7 +97,7 @@ type WorkspacePermissionConnector interface {
 	// GET /2.0/workspaces/{workspace}/permissions
 	//
 	// https://docs.go-atlassian.io/bitbucket-cloud/workspace/permissions#get-user-permissions-in-a-workspace
-	Members(ctx context.Context, workspace, query string) (*models.WorkspaceMembershipPageScheme, *models.ResponseScheme, error)
+	Members(ctx context.Context, workspace, query string, opts *models.PageOptions) (*models.WorkspaceMembershipPageScheme, *models.ResponseScheme, error)
 
 	// Repositories returns an object for each repository permission for all of a workspaces repositories.
 	//
@@ -108,7 +108,7 @@ type WorkspacePermissionConnector interface {
 	// GET /2.0/workspaces/{workspace}/permissions/repositories
 	//
 	// https://docs.go-atlassian.io/bitbucket-cloud/workspace/permissions#gets-all-repository-permissions-in-a-workspace
-	Repositories(ctx context.Context, workspace, query, sort string) (*models.RepositoryPermissionPageScheme, *models.ResponseScheme, error)
+	Repositories(ctx context.Context, workspace, query, sort string, opts *models.PageOptions) (*models.RepositoryPermissionPageScheme, *models.ResponseScheme, error)
 
 	// Repository returns an object for the repository permission of each user in the requested repository.
 	//

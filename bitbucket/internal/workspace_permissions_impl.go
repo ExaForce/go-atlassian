@@ -3,12 +3,14 @@ package internal
 import (
 	"context"
 	"fmt"
-	model "github.com/ctreminiom/go-atlassian/v2/pkg/infra/models"
-	"github.com/ctreminiom/go-atlassian/v2/service"
-	"github.com/ctreminiom/go-atlassian/v2/service/bitbucket"
 	"net/http"
 	"net/url"
 	"strings"
+
+	model "github.com/ctreminiom/go-atlassian/v2/pkg/infra/models"
+	"github.com/ctreminiom/go-atlassian/v2/pkg/infra/utils"
+	"github.com/ctreminiom/go-atlassian/v2/service"
+	"github.com/ctreminiom/go-atlassian/v2/service/bitbucket"
 )
 
 // NewWorkspacePermissionService creates a new WorkspacePermissionService instance.
@@ -30,8 +32,8 @@ type WorkspacePermissionService struct {
 // GET /2.0/workspaces/{workspace}/permissions
 //
 // https://docs.go-atlassian.io/bitbucket-cloud/workspace/permissions#get-user-permissions-in-a-workspace
-func (w *WorkspacePermissionService) Members(ctx context.Context, workspace, query string) (*model.WorkspaceMembershipPageScheme, *model.ResponseScheme, error) {
-	return w.internalClient.Members(ctx, workspace, query)
+func (w *WorkspacePermissionService) Members(ctx context.Context, workspace, query string, opts *model.PageOptions) (*model.WorkspaceMembershipPageScheme, *model.ResponseScheme, error) {
+	return w.internalClient.Members(ctx, workspace, query, opts)
 }
 
 // Repositories returns an object for each repository permission for all of a workspaces repositories.
@@ -43,8 +45,8 @@ func (w *WorkspacePermissionService) Members(ctx context.Context, workspace, que
 // GET /2.0/workspaces/{workspace}/permissions/repositories
 //
 // https://docs.go-atlassian.io/bitbucket-cloud/workspace/permissions#gets-all-repository-permissions-in-a-workspace
-func (w *WorkspacePermissionService) Repositories(ctx context.Context, workspace, query, sort string) (*model.RepositoryPermissionPageScheme, *model.ResponseScheme, error) {
-	return w.internalClient.Repositories(ctx, workspace, query, sort)
+func (w *WorkspacePermissionService) Repositories(ctx context.Context, workspace, query, sort string, opts *model.PageOptions) (*model.RepositoryPermissionPageScheme, *model.ResponseScheme, error) {
+	return w.internalClient.Repositories(ctx, workspace, query, sort, opts)
 }
 
 // Repository returns an object for the repository permission of each user in the requested repository.
@@ -62,24 +64,33 @@ type internalWorkspacePermissionServiceImpl struct {
 	c service.Connector
 }
 
-func (i *internalWorkspacePermissionServiceImpl) Members(ctx context.Context, workspace, query string) (*model.WorkspaceMembershipPageScheme, *model.ResponseScheme, error) {
-
+func (i *internalWorkspacePermissionServiceImpl) Members(ctx context.Context, workspace, query string, opts *model.PageOptions) (*model.WorkspaceMembershipPageScheme, *model.ResponseScheme, error) {
 	if workspace == "" {
 		return nil, nil, model.ErrNoWorkspace
 	}
 
-	var endpoint strings.Builder
-	endpoint.WriteString(fmt.Sprintf("2.0/workspaces/%v/permissions", workspace))
+	endpoint := fmt.Sprintf("2.0/workspaces/%v/permissions", workspace)
 
-	if query != "" {
-
-		params := url.Values{}
-		params.Add("q", query)
-
-		endpoint.WriteString(fmt.Sprintf("?%v", params.Encode()))
+	// Add pagination parameters first
+	urlStr, err := utils.AddPaginationParams(endpoint, opts)
+	if err != nil {
+		return nil, nil, err
 	}
 
-	request, err := i.c.NewRequest(ctx, http.MethodGet, endpoint.String(), "", nil)
+	// Parse the URL to add additional parameters
+	u, err := url.Parse(urlStr)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Add query parameter
+	q := u.Query()
+	if query != "" {
+		q.Add("q", query)
+	}
+	u.RawQuery = q.Encode()
+
+	request, err := i.c.NewRequest(ctx, http.MethodGet, u.String(), "", nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -93,28 +104,36 @@ func (i *internalWorkspacePermissionServiceImpl) Members(ctx context.Context, wo
 	return page, response, nil
 }
 
-func (i *internalWorkspacePermissionServiceImpl) Repositories(ctx context.Context, workspace, query, sort string) (*model.RepositoryPermissionPageScheme, *model.ResponseScheme, error) {
-
+func (i *internalWorkspacePermissionServiceImpl) Repositories(ctx context.Context, workspace, query, sort string, opts *model.PageOptions) (*model.RepositoryPermissionPageScheme, *model.ResponseScheme, error) {
 	if workspace == "" {
 		return nil, nil, model.ErrNoWorkspace
 	}
 
-	var endpoint strings.Builder
-	endpoint.WriteString(fmt.Sprintf("2.0/workspaces/%v/permissions/repositories", workspace))
+	endpoint := fmt.Sprintf("2.0/workspaces/%v/permissions/repositories", workspace)
 
-	params := url.Values{}
+	// Add pagination parameters first
+	urlStr, err := utils.AddPaginationParams(endpoint, opts)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Parse the URL to add additional parameters
+	u, err := url.Parse(urlStr)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Add query and sort parameters
+	q := u.Query()
 	if query != "" {
-		params.Add("q", query)
+		q.Add("q", query)
 	}
 	if sort != "" {
-		params.Add("sort", sort)
+		q.Add("sort", sort)
 	}
+	u.RawQuery = q.Encode()
 
-	if params.Encode() != "" {
-		endpoint.WriteString(fmt.Sprintf("?%v", params.Encode()))
-	}
-
-	request, err := i.c.NewRequest(ctx, http.MethodGet, endpoint.String(), "", nil)
+	request, err := i.c.NewRequest(ctx, http.MethodGet, u.String(), "", nil)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -22,6 +22,7 @@ func Test_internalWorkspaceServiceImpl_Get(t *testing.T) {
 	type args struct {
 		ctx       context.Context
 		workspace string
+		opts      *model.PageOptions
 	}
 
 	testCases := []struct {
@@ -37,6 +38,7 @@ func Test_internalWorkspaceServiceImpl_Get(t *testing.T) {
 			args: args{
 				ctx:       context.Background(),
 				workspace: "work-space-name-sample",
+				opts:      &model.PageOptions{Page: 1, PageLen: 20},
 			},
 			on: func(fields *fields) {
 
@@ -45,7 +47,7 @@ func Test_internalWorkspaceServiceImpl_Get(t *testing.T) {
 				client.On("NewRequest",
 					context.Background(),
 					http.MethodGet,
-					"2.0/workspaces/work-space-name-sample",
+					"2.0/workspaces/work-space-name-sample?page=1&pagelen=20",
 					"", nil).
 					Return(&http.Request{}, nil)
 
@@ -63,6 +65,7 @@ func Test_internalWorkspaceServiceImpl_Get(t *testing.T) {
 			args: args{
 				ctx:       context.Background(),
 				workspace: "work-space-name-sample",
+				opts:      &model.PageOptions{Page: 1, PageLen: 5},
 			},
 			on: func(fields *fields) {
 
@@ -71,7 +74,7 @@ func Test_internalWorkspaceServiceImpl_Get(t *testing.T) {
 				client.On("NewRequest",
 					context.Background(),
 					http.MethodGet,
-					"2.0/workspaces/work-space-name-sample",
+					"2.0/workspaces/work-space-name-sample?page=1&pagelen=5",
 					"", nil).
 					Return(&http.Request{}, errors.New("error, unable to create the http request"))
 
@@ -102,7 +105,7 @@ func Test_internalWorkspaceServiceImpl_Get(t *testing.T) {
 
 			newService := NewWorkspaceService(testCase.fields.c, nil, nil, nil)
 
-			gotResult, gotResponse, err := newService.Get(testCase.args.ctx, testCase.args.workspace)
+			gotResult, gotResponse, err := newService.Get(testCase.args.ctx, testCase.args.workspace, testCase.args.opts)
 
 			if testCase.wantErr {
 
@@ -131,6 +134,7 @@ func Test_internalWorkspaceServiceImpl_Members(t *testing.T) {
 	type args struct {
 		ctx       context.Context
 		workspace string
+		opts      *model.PageOptions
 	}
 
 	testCases := []struct {
@@ -146,6 +150,7 @@ func Test_internalWorkspaceServiceImpl_Members(t *testing.T) {
 			args: args{
 				ctx:       context.Background(),
 				workspace: "work-space-name-sample",
+				opts:      &model.PageOptions{Page: 1, PageLen: 20},
 			},
 			on: func(fields *fields) {
 
@@ -154,7 +159,7 @@ func Test_internalWorkspaceServiceImpl_Members(t *testing.T) {
 				client.On("NewRequest",
 					context.Background(),
 					http.MethodGet,
-					"2.0/workspaces/work-space-name-sample/members",
+					"2.0/workspaces/work-space-name-sample/members?page=1&pagelen=20",
 					"", nil).
 					Return(&http.Request{}, nil)
 
@@ -172,6 +177,7 @@ func Test_internalWorkspaceServiceImpl_Members(t *testing.T) {
 			args: args{
 				ctx:       context.Background(),
 				workspace: "work-space-name-sample",
+				opts:      &model.PageOptions{Page: 1, PageLen: 5},
 			},
 			on: func(fields *fields) {
 
@@ -180,7 +186,7 @@ func Test_internalWorkspaceServiceImpl_Members(t *testing.T) {
 				client.On("NewRequest",
 					context.Background(),
 					http.MethodGet,
-					"2.0/workspaces/work-space-name-sample/members",
+					"2.0/workspaces/work-space-name-sample/members?page=1&pagelen=5",
 					"", nil).
 					Return(&http.Request{}, errors.New("error, unable to create the http request"))
 
@@ -211,7 +217,7 @@ func Test_internalWorkspaceServiceImpl_Members(t *testing.T) {
 
 			newService := NewWorkspaceService(testCase.fields.c, nil, nil, nil)
 
-			gotResult, gotResponse, err := newService.Members(testCase.args.ctx, testCase.args.workspace)
+			gotResult, gotResponse, err := newService.Members(testCase.args.ctx, testCase.args.workspace, testCase.args.opts)
 
 			if testCase.wantErr {
 
@@ -240,6 +246,7 @@ func Test_internalWorkspaceServiceImpl_Projects(t *testing.T) {
 	type args struct {
 		ctx       context.Context
 		workspace string
+		opts      *model.PageOptions
 	}
 
 	testCases := []struct {
@@ -255,6 +262,7 @@ func Test_internalWorkspaceServiceImpl_Projects(t *testing.T) {
 			args: args{
 				ctx:       context.Background(),
 				workspace: "work-space-name-sample",
+				opts:      &model.PageOptions{Page: 1, PageLen: 20},
 			},
 			on: func(fields *fields) {
 
@@ -263,7 +271,7 @@ func Test_internalWorkspaceServiceImpl_Projects(t *testing.T) {
 				client.On("NewRequest",
 					context.Background(),
 					http.MethodGet,
-					"2.0/workspaces/work-space-name-sample/projects",
+					"2.0/workspaces/work-space-name-sample/projects?page=1&pagelen=20",
 					"", nil).
 					Return(&http.Request{}, nil)
 
@@ -281,6 +289,7 @@ func Test_internalWorkspaceServiceImpl_Projects(t *testing.T) {
 			args: args{
 				ctx:       context.Background(),
 				workspace: "work-space-name-sample",
+				opts:      &model.PageOptions{Page: 1, PageLen: 5},
 			},
 			on: func(fields *fields) {
 
@@ -289,7 +298,7 @@ func Test_internalWorkspaceServiceImpl_Projects(t *testing.T) {
 				client.On("NewRequest",
 					context.Background(),
 					http.MethodGet,
-					"2.0/workspaces/work-space-name-sample/projects",
+					"2.0/workspaces/work-space-name-sample/projects?page=1&pagelen=5",
 					"", nil).
 					Return(&http.Request{}, errors.New("error, unable to create the http request"))
 
@@ -320,7 +329,7 @@ func Test_internalWorkspaceServiceImpl_Projects(t *testing.T) {
 
 			newService := NewWorkspaceService(testCase.fields.c, nil, nil, nil)
 
-			gotResult, gotResponse, err := newService.Projects(testCase.args.ctx, testCase.args.workspace)
+			gotResult, gotResponse, err := newService.Projects(testCase.args.ctx, testCase.args.workspace, testCase.args.opts)
 
 			if testCase.wantErr {
 
