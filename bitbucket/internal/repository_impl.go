@@ -229,3 +229,43 @@ func (i *internalRepositoryServiceImpl) ListPullRequests(ctx context.Context, wo
 
 	return pullRequests, response, nil
 }
+
+// ListDeployKeys returns a paginated list of all deploy keys for the specified repository
+//
+// GET /2.0/repositories/{workspace}/{repo_slug}/deploy-keys
+//
+// https://developer.atlassian.com/cloud/bitbucket/rest/api-group-deployments/#api-repositories-workspace-repo-slug-deploy-keys-get
+func (r *RepositoryService) ListDeployKeys(ctx context.Context, workspace, repoSlug string, opts *model.PageOptions) (*model.DeployKeysPageScheme, *model.ResponseScheme, error) {
+	return r.internalClient.ListDeployKeys(ctx, workspace, repoSlug, opts)
+}
+
+func (i *internalRepositoryServiceImpl) ListDeployKeys(ctx context.Context, workspace, repoSlug string, opts *model.PageOptions) (*model.DeployKeysPageScheme, *model.ResponseScheme, error) {
+	if workspace == "" {
+		return nil, nil, model.ErrNoWorkspace
+	}
+
+	if repoSlug == "" {
+		return nil, nil, model.ErrNoRepository
+	}
+
+	endpoint := fmt.Sprintf("2.0/repositories/%v/%v/deploy-keys", workspace, repoSlug)
+
+	// Add pagination parameters
+	urlStr, err := utils.AddPaginationParams(endpoint, opts)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	request, err := i.c.NewRequest(ctx, http.MethodGet, urlStr, "", nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	deployKeys := new(model.DeployKeysPageScheme)
+	response, err := i.c.Call(request, deployKeys)
+	if err != nil {
+		return nil, response, err
+	}
+
+	return deployKeys, response, nil
+}

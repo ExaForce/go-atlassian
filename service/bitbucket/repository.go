@@ -46,6 +46,7 @@ type RepositoryConnector interface {
 	ListBranchRestrictions(ctx context.Context, workspace, repoSlug string, opts *models.PageOptions) (*models.BranchRestrictionsPageScheme, *models.ResponseScheme, error)
 	ListDefaultReviewers(ctx context.Context, workspace, repoSlug string, opts *models.PageOptions) (*models.DefaultReviewersPageScheme, *models.ResponseScheme, error)
 	ListPullRequests(ctx context.Context, workspace, repoSlug string, opts *models.PageOptions) (*models.PullRequestsResponse, *models.ResponseScheme, error)
+	ListDeployKeys(ctx context.Context, workspace, repoSlug string, opts *models.PageOptions) (*models.DeployKeysPageScheme, *models.ResponseScheme, error)
 }
 
 // RepositoryForkConnector represents the Bitbucket Cloud repository forks.
