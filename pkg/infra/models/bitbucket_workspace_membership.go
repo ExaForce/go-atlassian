@@ -1,7 +1,5 @@
 package models
 
-import "time"
-
 // WorkspaceMembershipPageScheme represents a paginated list of workspace memberships.
 type WorkspaceMembershipPageScheme struct {
 	Size     int                          `json:"size,omitempty"`     // The number of memberships in the current page.
@@ -17,9 +15,9 @@ type WorkspaceMembershipScheme struct {
 	Links        *WorkspaceMembershipLinksScheme `json:"links,omitempty"`         // The links related to the membership.
 	User         *BitbucketAccountScheme         `json:"user,omitempty"`          // The user who has the membership.
 	Workspace    *WorkspaceScheme                `json:"workspace,omitempty"`     // The workspace to which the membership applies.
-	AddedOn      time.Time                       `json:"added_on,omitempty"`      // The time when the membership was added.
+	AddedOn      string                          `json:"added_on,omitempty"`      // The time when the membership was added.
 	Permission   string                          `json:"permission,omitempty"`    // The level of the membership.
-	LastAccessed time.Time                       `json:"last_accessed,omitempty"` // The last time the membership was accessed.
+	LastAccessed string                          `json:"last_accessed,omitempty"` // The last time the membership was accessed.
 }
 
 // WorkspaceMembershipLinksScheme represents a collection of links related to a workspace membership.
