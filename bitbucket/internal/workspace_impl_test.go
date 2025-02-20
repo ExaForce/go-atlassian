@@ -103,7 +103,7 @@ func Test_internalWorkspaceServiceImpl_Get(t *testing.T) {
 				testCase.on(&testCase.fields)
 			}
 
-			newService := NewWorkspaceService(testCase.fields.c, nil, nil, nil)
+			newService := NewWorkspaceService(testCase.fields.c, nil, nil, nil, nil)
 
 			gotResult, gotResponse, err := newService.Get(testCase.args.ctx, testCase.args.workspace, testCase.args.opts)
 
@@ -215,7 +215,7 @@ func Test_internalWorkspaceServiceImpl_Members(t *testing.T) {
 				testCase.on(&testCase.fields)
 			}
 
-			newService := NewWorkspaceService(testCase.fields.c, nil, nil, nil)
+			newService := NewWorkspaceService(testCase.fields.c, nil, nil, nil, nil)
 
 			gotResult, gotResponse, err := newService.Members(testCase.args.ctx, testCase.args.workspace, testCase.args.opts)
 
@@ -327,7 +327,7 @@ func Test_internalWorkspaceServiceImpl_Projects(t *testing.T) {
 				testCase.on(&testCase.fields)
 			}
 
-			newService := NewWorkspaceService(testCase.fields.c, nil, nil, nil)
+			newService := NewWorkspaceService(testCase.fields.c, nil, nil, nil, nil)
 
 			gotResult, gotResponse, err := newService.Projects(testCase.args.ctx, testCase.args.workspace, testCase.args.opts)
 
@@ -449,7 +449,7 @@ func Test_internalWorkspaceServiceImpl_Membership(t *testing.T) {
 				testCase.on(&testCase.fields)
 			}
 
-			newService := NewWorkspaceService(testCase.fields.c, nil, nil, nil)
+			newService := NewWorkspaceService(testCase.fields.c, nil, nil, nil, nil)
 
 			gotResult, gotResponse, err := newService.Membership(testCase.args.ctx, testCase.args.workspace, testCase.args.memberID)
 

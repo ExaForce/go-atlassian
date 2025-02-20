@@ -12,13 +12,14 @@ import (
 )
 
 // NewWorkspaceService handles communication with the workspace related methods of the Bitbucket API.
-func NewWorkspaceService(client service.Connector, webhook *WorkspaceHookService, permission *WorkspacePermissionService, repository *RepositoryService) *WorkspaceService {
+func NewWorkspaceService(client service.Connector, webhook *WorkspaceHookService, permission *WorkspacePermissionService, repository *RepositoryService, project *ProjectService) *WorkspaceService {
 
 	return &WorkspaceService{
 		internalClient: &internalWorkspaceServiceImpl{c: client},
 		Hook:           webhook,
 		Permission:     permission,
 		Repository:     repository,
+		Project:        project,
 	}
 }
 
@@ -28,6 +29,7 @@ type WorkspaceService struct {
 	Hook           *WorkspaceHookService
 	Permission     *WorkspacePermissionService
 	Repository     *RepositoryService
+	Project        *ProjectService
 }
 
 // Get returns the requested workspace with pagination support.

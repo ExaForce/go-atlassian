@@ -169,6 +169,7 @@ var (
 	ErrNoCreateIssues                 = errors.New("jira: no issues payload set")
 	ErrNoIssueScheme                  = errors.New("jira: no issue instance set")
 	ErrNoWorkspace                    = errors.New("bitbucket: no workspace set")
+	ErrNoProjectKey                   = errors.New("bitbucket: no project key set")
 	ErrNoMemberID                     = errors.New("bitbucket: no member id set")
 	ErrNoWebhookID                    = errors.New("bitbucket: no webhook id set")
 	ErrNoRepository                   = errors.New("bitbucket: no repository set")
