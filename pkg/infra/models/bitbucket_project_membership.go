@@ -21,10 +21,10 @@ type ProjectGroupMembershipPageScheme struct {
 }
 
 type ProjectGroupMembershipScheme struct {
-	Type       string                  `json:"type,omitempty"`       // The type of the membership.
-	Permission string                  `json:"permission,omitempty"` // The permission of the user in the project.
-	Group      *BitbucketGroupScheme   `json:"group,omitempty"`      // The group who has the membership.
-	Project    *BitbucketProjectScheme `json:"project,omitempty"`    // The project that the user has the membership in.
+	Type           string                  `json:"type,omitempty"`       // The type of the membership.
+	Permission     string                  `json:"permission,omitempty"` // The permission of the user in the project.
+	BitbucketGroup *BitbucketGroupScheme   `json:"group,omitempty"`      // The group who has the membership.
+	Project        *BitbucketProjectScheme `json:"project,omitempty"`    // The project that the user has the membership in.
 }
 
 type ProjectUserMembershipScheme struct {
