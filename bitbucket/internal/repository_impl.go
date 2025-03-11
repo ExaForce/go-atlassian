@@ -269,3 +269,43 @@ func (i *internalRepositoryServiceImpl) ListDeployKeys(ctx context.Context, work
 
 	return deployKeys, response, nil
 }
+
+// ListRepositoryExplicitGroupPermissions returns a paginated list of all explicit group permissions for the specified repository
+//
+// GET /2.0/repositories/{workspace}/{repo_slug}/permissions-config/groups
+//
+// https://developer.atlassian.com/cloud/bitbucket/rest/api-group-repositories/#api-repositories-workspace-repo-slug-permissions-config-groups-get
+func (r *RepositoryService) ListRepositoryExplicitGroupPermissions(ctx context.Context, workspace, repoSlug string, opts *model.PageOptions) (*model.RepositoryGroupPermissionsPageScheme, *model.ResponseScheme, error) {
+	return r.internalClient.ListRepositoryExplicitGroupPermissions(ctx, workspace, repoSlug, opts)
+}
+
+func (i *internalRepositoryServiceImpl) ListRepositoryExplicitGroupPermissions(ctx context.Context, workspace, repoSlug string, opts *model.PageOptions) (*model.RepositoryGroupPermissionsPageScheme, *model.ResponseScheme, error) {
+	if workspace == "" {
+		return nil, nil, model.ErrNoWorkspace
+	}
+
+	if repoSlug == "" {
+		return nil, nil, model.ErrNoRepository
+	}
+
+	endpoint := fmt.Sprintf("2.0/repositories/%v/%v/permissions-config/groups", workspace, repoSlug)
+
+	// Add pagination parameters
+	urlStr, err := utils.AddPaginationParams(endpoint, opts)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	request, err := i.c.NewRequest(ctx, http.MethodGet, urlStr, "", nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	repositoryGroupPermissions := new(model.RepositoryGroupPermissionsPageScheme)
+	response, err := i.c.Call(request, repositoryGroupPermissions)
+	if err != nil {
+		return nil, response, err
+	}
+
+	return repositoryGroupPermissions, response, nil
+}
