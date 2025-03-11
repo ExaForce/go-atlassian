@@ -309,3 +309,43 @@ func (i *internalRepositoryServiceImpl) ListRepositoryExplicitGroupPermissions(c
 
 	return repositoryGroupPermissions, response, nil
 }
+
+// ListRepositoryPipelineVariables returns a paginated list of all pipeline variables for the specified repository
+//
+// GET /2.0/repositories/{workspace}/{repo_slug}/pipelines_config/variables
+//
+// https://developer.atlassian.com/cloud/bitbucket/rest/api-group-repositories/#api-repositories-workspace-repo-slug-pipelines-config-variables-get
+func (r *RepositoryService) ListRepositoryPipelineVariables(ctx context.Context, workspace, repoSlug string, opts *model.PageOptions) (*model.RepositoryPipelineVariablesPageScheme, *model.ResponseScheme, error) {
+	return r.internalClient.ListRepositoryPipelineVariables(ctx, workspace, repoSlug, opts)
+}
+
+func (i *internalRepositoryServiceImpl) ListRepositoryPipelineVariables(ctx context.Context, workspace, repoSlug string, opts *model.PageOptions) (*model.RepositoryPipelineVariablesPageScheme, *model.ResponseScheme, error) {
+	if workspace == "" {
+		return nil, nil, model.ErrNoWorkspace
+	}
+
+	if repoSlug == "" {
+		return nil, nil, model.ErrNoRepository
+	}
+
+	endpoint := fmt.Sprintf("2.0/repositories/%v/%v/pipelines_config/variables", workspace, repoSlug)
+
+	// Add pagination parameters
+	urlStr, err := utils.AddPaginationParams(endpoint, opts)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	request, err := i.c.NewRequest(ctx, http.MethodGet, urlStr, "", nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	pipelineVariables := new(model.RepositoryPipelineVariablesPageScheme)
+	response, err := i.c.Call(request, pipelineVariables)
+	if err != nil {
+		return nil, response, err
+	}
+
+	return pipelineVariables, response, nil
+}

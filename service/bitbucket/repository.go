@@ -48,6 +48,7 @@ type RepositoryConnector interface {
 	ListPullRequests(ctx context.Context, workspace, repoSlug string, opts *models.PageOptions) (*models.PullRequestsResponse, *models.ResponseScheme, error)
 	ListDeployKeys(ctx context.Context, workspace, repoSlug string, opts *models.PageOptions) (*models.DeployKeysPageScheme, *models.ResponseScheme, error)
 	ListRepositoryExplicitGroupPermissions(ctx context.Context, workspace, repoSlug string, opts *models.PageOptions) (*models.RepositoryGroupPermissionsPageScheme, *models.ResponseScheme, error)
+	ListRepositoryPipelineVariables(ctx context.Context, workspace, repoSlug string, opts *models.PageOptions) (*models.RepositoryPipelineVariablesPageScheme, *models.ResponseScheme, error)
 }
 
 // RepositoryForkConnector represents the Bitbucket Cloud repository forks.
