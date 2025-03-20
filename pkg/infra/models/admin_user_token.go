@@ -9,8 +9,10 @@ import "time"
 // CreatedAt is the time when the token was created.
 // LastAccess is the last time the token was accessed.
 type UserTokensScheme struct {
-	ID         string    `json:"id,omitempty"`         // The ID of the user token.
-	Label      string    `json:"label,omitempty"`      // The label of the user token.
-	CreatedAt  time.Time `json:"createdAt,omitempty"`  // The creation time of the user token.
-	LastAccess time.Time `json:"lastAccess,omitempty"` // The last access time of the user token.
+	ID             string    `json:"id,omitempty"`             // The ID of the user token.
+	Label          string    `json:"label,omitempty"`          // The label of the user token.
+	CreatedAt      time.Time `json:"createdAt,omitempty"`      // The creation time of the user token.
+	LastAccess     time.Time `json:"lastAccess,omitempty"`     // The last access time of the user token.
+	DisabledStatus bool      `json:"disabledStatus,omitempty"` // The disabled status of the user token.
+	Expiry         time.Time `json:"expiry,omitempty"`         // The expiry time of the user token.
 }
