@@ -73,6 +73,13 @@ type OrganizationConnector interface {
 	// https://developer.atlassian.com/cloud/admin/organization/rest/api-group-users/#api-v1-orgs-orgid-users-search-post
 	SearchUsers(ctx context.Context, organizationID string, payload *model.OrganizationUserSearchParams) (*model.OrganizationUserSearchPage, *model.ResponseScheme, error)
 
+	// GetUsersV2 returns a list of users (managed or unmanaged) in an organization.
+	//
+	// GET /admin/v2/orgs/{organizationID}/directories/{directoryID}/users
+	//
+	// https://developer.atlassian.com/cloud/admin/organization/rest/api-group-users/#api-v2-orgs-orgid-directories-directoryid-users-get
+	GetUsersV2(ctx context.Context, organizationID string, directoryID string) (*model.OrganizationUsersV2Page, *model.ResponseScheme, error)
+
 	// SearchGroups searches for groups within an organization with the specified filters
 	//
 	// POST /admin/v1/orgs/{organizationID}/groups/search

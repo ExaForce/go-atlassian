@@ -285,6 +285,31 @@ type OrganizationUserSearchPage struct {
 	} `json:"links,omitempty"`
 }
 
+// OrganizationUsersV2Page represents a page of users in an organization
+//
+// https://developer.atlassian.com/cloud/admin/organization/rest/api-group-users/#api-v2-orgs-orgid-users-directories-directoryid-users-get
+type OrganizationUsersV2Page struct {
+	Data  []OrganizationUserV2 `json:"data,omitempty"`
+	Links struct {
+		Next string `json:"next,omitempty"`
+		Self string `json:"self,omitempty"`
+	} `json:"links,omitempty"`
+}
+
+type OrganizationUserV2 struct {
+	AccountId        string   `json:"accountId,omitempty"`
+	AccountType      string   `json:"accountType,omitempty"`
+	AccountStatus    string   `json:"accountStatus,omitempty"`
+	MembershipStatus string   `json:"membershipStatus,omitempty"`
+	AddedToOrg       string   `json:"addedToOrg,omitempty"`
+	Name             string   `json:"name,omitempty"`
+	Nickname         string   `json:"nickname,omitempty"`
+	Email            string   `json:"email,omitempty"`
+	EmailVerified    bool     `json:"emailVerified,omitempty"`
+	ClaimStatus      string   `json:"claimStatus,omitempty"`
+	PlatformRoles    []string `json:"platformRoles,omitempty"`
+}
+
 // OrganizationUserSearch represents a user returned from the search endpoint
 type OrganizationUserSearch struct {
 	AccountId         string              `json:"accountId,omitempty"`
