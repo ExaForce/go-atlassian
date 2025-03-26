@@ -111,8 +111,8 @@ func (o *OrganizationService) SearchUsers(ctx context.Context, organizationID st
 // GET /admin/v2/orgs/{organizationID}/directories/{directoryID}/users
 //
 // https://developer.atlassian.com/cloud/admin/organization/rest/api-group-users/#api-v2-orgs-orgid-directories-directoryid-users-get
-func (o *OrganizationService) GetUsersV2(ctx context.Context, organizationID string, directoryID string) (*model.OrganizationUsersV2Page, *model.ResponseScheme, error) {
-	return o.internalClient.GetUsersV2(ctx, organizationID, directoryID)
+func (o *OrganizationService) GetUsersV2(ctx context.Context, organizationID string, directoryID string, params *model.OrganizationGetUsersV2Params) (*model.OrganizationUsersV2Page, *model.ResponseScheme, error) {
+	return o.internalClient.GetUsersV2(ctx, organizationID, directoryID, params)
 }
 
 // SearchGroups searches for groups within an organization with the specified filters
@@ -435,7 +435,7 @@ func (i *internalOrganizationImpl) SearchWorkspaces(ctx context.Context, organiz
 	return workspaces, res, nil
 }
 
-func (i *internalOrganizationImpl) GetUsersV2(ctx context.Context, organizationID string, directoryID string) (*model.OrganizationUsersV2Page, *model.ResponseScheme, error) {
+func (i *internalOrganizationImpl) GetUsersV2(ctx context.Context, organizationID string, directoryID string, params *model.OrganizationGetUsersV2Params) (*model.OrganizationUsersV2Page, *model.ResponseScheme, error) {
 	if organizationID == "" {
 		return nil, nil, model.ErrNoAdminOrganization
 	}
@@ -445,6 +445,16 @@ func (i *internalOrganizationImpl) GetUsersV2(ctx context.Context, organizationI
 	}
 
 	endpoint := fmt.Sprintf("admin/v2/orgs/%v/directories/%v/users", organizationID, directoryID)
+
+	if params != nil {
+		if params.Cursor != "" && params.Limit != 0 {
+			endpoint = fmt.Sprintf("%v?cursor=%v&limit=%v", endpoint, params.Cursor, params.Limit)
+		} else if params.Cursor != "" {
+			endpoint = fmt.Sprintf("%v?cursor=%v", endpoint, params.Cursor)
+		} else if params.Limit != 0 {
+			endpoint = fmt.Sprintf("%v?limit=%v", endpoint, params.Limit)
+		}
+	}
 
 	req, err := i.c.NewRequest(ctx, http.MethodGet, endpoint, "", nil)
 	if err != nil {

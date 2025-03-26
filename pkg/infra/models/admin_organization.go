@@ -276,6 +276,12 @@ type OrganizationUserSearchParams struct {
 	Expand           []string             `json:"expand,omitempty"`
 }
 
+// OrganizationGetUsersV2Params represents the parameters for getting users in an organization
+type OrganizationGetUsersV2Params struct {
+	Cursor string `json:"cursor,omitempty"`
+	Limit  int    `json:"limit,omitempty"`
+}
+
 // OrganizationUserSearchPage represents the response from searching users in an organization
 type OrganizationUserSearchPage struct {
 	Data  []OrganizationUserSearch `json:"data,omitempty"`
