@@ -1109,6 +1109,7 @@ func Test_internalOrganizationImpl_GetUsersV2(t *testing.T) {
 		ctx            context.Context
 		organizationID string
 		directoryID    string
+		params         *model.OrganizationGetUsersV2Params
 	}
 
 	testCases := []struct {
@@ -1125,6 +1126,10 @@ func Test_internalOrganizationImpl_GetUsersV2(t *testing.T) {
 				ctx:            context.Background(),
 				organizationID: "organization-sample-uuid",
 				directoryID:    "directory-sample-uuid",
+				params: &model.OrganizationGetUsersV2Params{
+					Cursor: "cursor-sample-uuid",
+					Limit:  50,
+				},
 			},
 			on: func(fields *fields) {
 				client := mocks.NewConnector(t)
@@ -1132,7 +1137,7 @@ func Test_internalOrganizationImpl_GetUsersV2(t *testing.T) {
 				client.On("NewRequest",
 					context.Background(),
 					http.MethodGet,
-					"admin/v2/orgs/organization-sample-uuid/directories/directory-sample-uuid/users",
+					"admin/v2/orgs/organization-sample-uuid/directories/directory-sample-uuid/users?cursor=cursor-sample-uuid&limit=50",
 					"",
 					nil).
 					Return(&http.Request{}, nil)
@@ -1174,6 +1179,10 @@ func Test_internalOrganizationImpl_GetUsersV2(t *testing.T) {
 				ctx:            context.Background(),
 				organizationID: "organization-sample-uuid",
 				directoryID:    "directory-sample-uuid",
+				params: &model.OrganizationGetUsersV2Params{
+					Cursor: "cursor-sample-uuid",
+					Limit:  50,
+				},
 			},
 			on: func(fields *fields) {
 				client := mocks.NewConnector(t)
@@ -1181,7 +1190,7 @@ func Test_internalOrganizationImpl_GetUsersV2(t *testing.T) {
 				client.On("NewRequest",
 					context.Background(),
 					http.MethodGet,
-					"admin/v2/orgs/organization-sample-uuid/directories/directory-sample-uuid/users",
+					"admin/v2/orgs/organization-sample-uuid/directories/directory-sample-uuid/users?cursor=cursor-sample-uuid&limit=50",
 					"",
 					nil).
 					Return(&http.Request{}, errors.New("error, unable to create the http request"))
@@ -1202,7 +1211,7 @@ func Test_internalOrganizationImpl_GetUsersV2(t *testing.T) {
 
 			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil)
 
-			gotResult, gotResponse, err := newOrganizationService.GetUsersV2(testCase.args.ctx, testCase.args.organizationID, testCase.args.directoryID)
+			gotResult, gotResponse, err := newOrganizationService.GetUsersV2(testCase.args.ctx, testCase.args.organizationID, testCase.args.directoryID, testCase.args.params)
 
 			if testCase.wantErr {
 				if err != nil {

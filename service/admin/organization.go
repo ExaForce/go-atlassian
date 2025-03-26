@@ -78,7 +78,7 @@ type OrganizationConnector interface {
 	// GET /admin/v2/orgs/{organizationID}/directories/{directoryID}/users
 	//
 	// https://developer.atlassian.com/cloud/admin/organization/rest/api-group-users/#api-v2-orgs-orgid-directories-directoryid-users-get
-	GetUsersV2(ctx context.Context, organizationID string, directoryID string) (*model.OrganizationUsersV2Page, *model.ResponseScheme, error)
+	GetUsersV2(ctx context.Context, organizationID string, directoryID string, params *model.OrganizationGetUsersV2Params) (*model.OrganizationUsersV2Page, *model.ResponseScheme, error)
 
 	// SearchGroups searches for groups within an organization with the specified filters
 	//
