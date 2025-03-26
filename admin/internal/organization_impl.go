@@ -106,6 +106,15 @@ func (o *OrganizationService) SearchUsers(ctx context.Context, organizationID st
 	return o.internalClient.SearchUsers(ctx, organizationID, payload)
 }
 
+// GetUsersV2 returns a list of users (managed or unmanaged) in an organization.
+//
+// GET /admin/v2/orgs/{organizationID}/directories/{directoryID}/users
+//
+// https://developer.atlassian.com/cloud/admin/organization/rest/api-group-users/#api-v2-orgs-orgid-directories-directoryid-users-get
+func (o *OrganizationService) GetUsersV2(ctx context.Context, organizationID string, directoryID string) (*model.OrganizationUsersV2Page, *model.ResponseScheme, error) {
+	return o.internalClient.GetUsersV2(ctx, organizationID, directoryID)
+}
+
 // SearchGroups searches for groups within an organization with the specified filters
 //
 // POST /admin/v1/orgs/{organizationID}/groups/search
@@ -424,4 +433,29 @@ func (i *internalOrganizationImpl) SearchWorkspaces(ctx context.Context, organiz
 	}
 
 	return workspaces, res, nil
+}
+
+func (i *internalOrganizationImpl) GetUsersV2(ctx context.Context, organizationID string, directoryID string) (*model.OrganizationUsersV2Page, *model.ResponseScheme, error) {
+	if organizationID == "" {
+		return nil, nil, model.ErrNoAdminOrganization
+	}
+
+	if directoryID == "" {
+		return nil, nil, model.ErrNoAdminDirectoryID
+	}
+
+	endpoint := fmt.Sprintf("admin/v2/orgs/%v/directories/%v/users", organizationID, directoryID)
+
+	req, err := i.c.NewRequest(ctx, http.MethodGet, endpoint, "", nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	users := new(model.OrganizationUsersV2Page)
+	res, err := i.c.Call(req, users)
+	if err != nil {
+		return nil, res, err
+	}
+
+	return users, res, nil
 }

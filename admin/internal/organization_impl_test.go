@@ -1099,6 +1099,125 @@ func Test_internalOrganizationImpl_SearchUsers(t *testing.T) {
 	}
 }
 
+func Test_internalOrganizationImpl_GetUsersV2(t *testing.T) {
+
+	type fields struct {
+		c service.Connector
+	}
+
+	type args struct {
+		ctx            context.Context
+		organizationID string
+		directoryID    string
+	}
+
+	testCases := []struct {
+		name    string
+		fields  fields
+		args    args
+		on      func(*fields)
+		wantErr bool
+		Err     error
+	}{
+		{
+			name: "when the parameters are correct",
+			args: args{
+				ctx:            context.Background(),
+				organizationID: "organization-sample-uuid",
+				directoryID:    "directory-sample-uuid",
+			},
+			on: func(fields *fields) {
+				client := mocks.NewConnector(t)
+
+				client.On("NewRequest",
+					context.Background(),
+					http.MethodGet,
+					"admin/v2/orgs/organization-sample-uuid/directories/directory-sample-uuid/users",
+					"",
+					nil).
+					Return(&http.Request{}, nil)
+
+				client.On("Call",
+					&http.Request{},
+					&model.OrganizationUsersV2Page{}).
+					Return(&model.ResponseScheme{}, nil)
+
+				fields.c = client
+			},
+		},
+
+		{
+			name: "when the organization id is not provided",
+			args: args{
+				ctx:            context.Background(),
+				organizationID: "",
+				directoryID:    "directory-sample-uuid",
+			},
+			wantErr: true,
+			Err:     model.ErrNoAdminOrganization,
+		},
+
+		{
+			name: "when the directory id is not provided",
+			args: args{
+				ctx:            context.Background(),
+				organizationID: "organization-sample-uuid",
+				directoryID:    "",
+			},
+			wantErr: true,
+			Err:     model.ErrNoAdminDirectoryID,
+		},
+
+		{
+			name: "when the http request cannot be created",
+			args: args{
+				ctx:            context.Background(),
+				organizationID: "organization-sample-uuid",
+				directoryID:    "directory-sample-uuid",
+			},
+			on: func(fields *fields) {
+				client := mocks.NewConnector(t)
+
+				client.On("NewRequest",
+					context.Background(),
+					http.MethodGet,
+					"admin/v2/orgs/organization-sample-uuid/directories/directory-sample-uuid/users",
+					"",
+					nil).
+					Return(&http.Request{}, errors.New("error, unable to create the http request"))
+
+				fields.c = client
+			},
+			wantErr: true,
+			Err:     errors.New("error, unable to create the http request"),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+
+			if testCase.on != nil {
+				testCase.on(&testCase.fields)
+			}
+
+			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil)
+
+			gotResult, gotResponse, err := newOrganizationService.GetUsersV2(testCase.args.ctx, testCase.args.organizationID, testCase.args.directoryID)
+
+			if testCase.wantErr {
+				if err != nil {
+					t.Logf("error returned: %v", err.Error())
+				}
+				assert.EqualError(t, err, testCase.Err.Error())
+			} else {
+				assert.NoError(t, err)
+				assert.NotEqual(t, gotResponse, nil)
+				assert.NotEqual(t, gotResult, nil)
+			}
+		})
+	}
+}
+
 func Test_internalOrganizationImpl_SearchGroups(t *testing.T) {
 
 	type fields struct {
