@@ -498,7 +498,7 @@ func TestRepositoryService_ListPullRequests(t *testing.T) {
 				ctx:       context.Background(),
 				workspace: "workspace-uuid",
 				repoSlug:  "repo-slug",
-				opts:      &models.PageOptions{Page: 1, PageLen: 20},
+				opts:      &models.PageOptions{Page: 1, PageLen: 20, Q: "updated_on>=2025-03-01T00:00:00.000Z"},
 			},
 			on: func(t *testing.T) (*RepositoryService, *models.ResponseScheme) {
 				client := NewRepositoryService(testConnector{
@@ -511,7 +511,7 @@ func TestRepositoryService_ListPullRequests(t *testing.T) {
 					},
 					requestMaker: func(ctx context.Context, method, path, query string, body interface{}) (*http.Request, error) {
 						assert.Equal(t, "GET", method)
-						assert.Equal(t, "2.0/repositories/workspace-uuid/repo-slug/pullrequests?page=1&pagelen=20&state=OPEN%2CMERGED%2CDECLINED%2CSUPERSEDED", path)
+						assert.Equal(t, "2.0/repositories/workspace-uuid/repo-slug/pullrequests?page=1&pagelen=20&q=updated_on%3E%3D2025-03-01T00%3A00%3A00.000Z&state=OPEN%2CMERGED%2CDECLINED%2CSUPERSEDED", path)
 
 						// Verify query parameters
 						u, err := url.Parse(query)

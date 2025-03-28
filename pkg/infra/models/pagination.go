@@ -7,4 +7,7 @@ type PageOptions struct {
 
 	// PageLen is the number of results to include per page
 	PageLen int `url:"pagelen,omitempty"`
+
+	// Q is the query string to filter the results
+	Q string `url:"q,omitempty"`
 }

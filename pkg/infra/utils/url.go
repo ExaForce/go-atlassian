@@ -27,6 +27,9 @@ func AddPaginationParams(endpoint string, opts *model.PageOptions) (string, erro
 		if opts.PageLen > 0 {
 			q.Add("pagelen", strconv.Itoa(opts.PageLen))
 		}
+		if opts.Q != "" {
+			q.Add("q", opts.Q)
+		}
 	}
 
 	// Set the query parameters
