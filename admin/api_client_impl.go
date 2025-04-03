@@ -28,7 +28,7 @@ const defaultAPIEndpoint = "https://api.atlassian.com/"
 
 // New creates a new instance of Client.
 // It takes a common.HTTPClient as input and returns a pointer to Client and an error.
-func New(httpClient common.HTTPClient, config *ClientConfig) (*Client, error) {
+func New(httpClient common.HTTPClient, config *model.ClientConfig) (*Client, error) {
 	// If no HTTP client is provided, use the default HTTP client.
 	if httpClient == nil {
 		httpClient = http.DefaultClient
@@ -42,7 +42,7 @@ func New(httpClient common.HTTPClient, config *ClientConfig) (*Client, error) {
 
 	// Use default config if not provided
 	if config == nil {
-		config = &ClientConfig{
+		config = &model.ClientConfig{
 			MaxRetries:        5,
 			InitialRetryDelay: 1000,
 			MaxRetryDelay:     10000,
@@ -78,16 +78,6 @@ func New(httpClient common.HTTPClient, config *ClientConfig) (*Client, error) {
 	client.User = internal.NewUserService(client, internal.NewUserTokenService(client))
 
 	return client, nil
-}
-
-// ClientConfig holds configuration options for the Client
-type ClientConfig struct {
-	// MaxRetries is the maximum number of retries for rate limit handling
-	MaxRetries int
-	// InitialRetryDelay is the initial delay between retries in milliseconds
-	InitialRetryDelay time.Duration
-	// MaxRetryDelay is the maximum delay between retries in milliseconds
-	MaxRetryDelay time.Duration
 }
 
 // Client represents a client for interacting with the Atlassian Administration API.

@@ -28,18 +28,8 @@ var timerPool = sync.Pool{
 // DefaultBitbucketSite is the default Bitbucket API site.
 const DefaultBitbucketSite = "https://api.bitbucket.org"
 
-// ClientConfig holds configuration options for the Client
-type ClientConfig struct {
-	// MaxRetries is the maximum number of retries for rate limit handling
-	MaxRetries int
-	// InitialRetryDelay is the initial delay between retries in milliseconds
-	InitialRetryDelay time.Duration
-	// MaxRetryDelay is the maximum delay between retries in milliseconds
-	MaxRetryDelay time.Duration
-}
-
 // New creates a new Bitbucket API client.
-func New(httpClient common.HTTPClient, site string, config *ClientConfig) (*Client, error) {
+func New(httpClient common.HTTPClient, site string, config *models.ClientConfig) (*Client, error) {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
@@ -59,7 +49,7 @@ func New(httpClient common.HTTPClient, site string, config *ClientConfig) (*Clie
 
 	// Use default config if not provided
 	if config == nil {
-		config = &ClientConfig{
+		config = &models.ClientConfig{
 			MaxRetries:        5,
 			InitialRetryDelay: 1000,
 			MaxRetryDelay:     10000,

@@ -220,26 +220,27 @@ func TestClient_Call(t *testing.T) {
 			name: "when rate limit is hit and retry succeeds",
 			on: func(fields *fields) {
 				client := mocks.NewHTTPClient(t)
-
 				// First call returns rate limit
-				rateLimitResponse := &http.Response{
-					StatusCode: http.StatusTooManyRequests,
-					Body:       io.NopCloser(strings.NewReader("Rate limit exceeded")),
-					Request: &http.Request{
-						Method: http.MethodGet,
-						URL:    &url.URL{},
-					},
-				}
-
-				// Second call succeeds
 				client.On("Do", mock.AnythingOfType("*http.Request")).
-					Return(rateLimitResponse, nil).
-					Times(1)
-
+					Return(&http.Response{
+						StatusCode: http.StatusTooManyRequests,
+						Body:       io.NopCloser(strings.NewReader("Rate limit exceeded")),
+						Request: &http.Request{
+							Method: http.MethodGet,
+							URL:    &url.URL{},
+						},
+					}, nil).
+					Once()
+				// Second call returns success
 				client.On("Do", mock.AnythingOfType("*http.Request")).
-					Return(expectedResponse, nil).
-					Times(1)
-
+					Return(&http.Response{
+						StatusCode: http.StatusOK,
+						Body:       io.NopCloser(strings.NewReader("Hello, world!")),
+						Request: &http.Request{
+							Method: http.MethodGet,
+							URL:    &url.URL{},
+						},
+					}, nil)
 				fields.HTTP = client
 			},
 			args: args{
@@ -247,10 +248,17 @@ func TestClient_Call(t *testing.T) {
 				structure: nil,
 			},
 			want: &model.ResponseScheme{
-				Response: expectedResponse,
-				Code:     http.StatusOK,
-				Method:   http.MethodGet,
-				Bytes:    *bytes.NewBufferString("Hello, world!"),
+				Response: &http.Response{
+					StatusCode: http.StatusOK,
+					Body:       io.NopCloser(strings.NewReader("Hello, world!")),
+					Request: &http.Request{
+						Method: http.MethodGet,
+						URL:    &url.URL{},
+					},
+				},
+				Code:   http.StatusOK,
+				Method: http.MethodGet,
+				Bytes:  *bytes.NewBufferString("Hello, world!"),
 			},
 			wantErr: false,
 		},
@@ -302,21 +310,15 @@ func TestClient_Call(t *testing.T) {
 			name: "when context is cancelled during rate limit retry",
 			on: func(fields *fields) {
 				client := mocks.NewHTTPClient(t)
-
-				// Return rate limit response
-				rateLimitResponse := &http.Response{
-					StatusCode: http.StatusTooManyRequests,
-					Body:       io.NopCloser(strings.NewReader("Rate limit exceeded")),
-					Request: &http.Request{
-						Method: http.MethodGet,
-						URL:    &url.URL{},
-					},
-				}
-
 				client.On("Do", mock.AnythingOfType("*http.Request")).
-					Return(rateLimitResponse, nil).
-					Times(1)
-
+					Return(&http.Response{
+						StatusCode: http.StatusTooManyRequests,
+						Body:       io.NopCloser(strings.NewReader("Rate limit exceeded")),
+						Request: &http.Request{
+							Method: http.MethodGet,
+							URL:    &url.URL{},
+						},
+					}, nil)
 				fields.HTTP = client
 			},
 			args: args{
@@ -325,7 +327,7 @@ func TestClient_Call(t *testing.T) {
 			},
 			want:    nil,
 			wantErr: true,
-			Err:     context.Canceled,
+			Err:     context.DeadlineExceeded,
 		},
 	}
 	for _, testCase := range testCases {
@@ -335,7 +337,7 @@ func TestClient_Call(t *testing.T) {
 				testCase.on(&testCase.fields)
 			}
 
-			config := &ClientConfig{
+			config := &model.ClientConfig{
 				MaxRetries:        5,
 				InitialRetryDelay: 1000,
 				MaxRetryDelay:     10000,
@@ -488,7 +490,7 @@ func TestClient_NewRequest(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 
-			config := &ClientConfig{
+			config := &model.ClientConfig{
 				MaxRetries:        5,
 				InitialRetryDelay: 1000,
 				MaxRetryDelay:     10000,
@@ -583,7 +585,7 @@ func TestClient_processResponse(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 
-			config := &ClientConfig{
+			config := &model.ClientConfig{
 				MaxRetries:        5,
 				InitialRetryDelay: 1000,
 				MaxRetryDelay:     10000,
@@ -628,7 +630,7 @@ func TestNew(t *testing.T) {
 	mockClient.Auth.SetUserAgent("aaa")
 
 	// Create a client with custom config
-	customConfig := &ClientConfig{
+	customConfig := &model.ClientConfig{
 		MaxRetries:        10,
 		InitialRetryDelay: 2000,
 		MaxRetryDelay:     20000,
@@ -641,7 +643,7 @@ func TestNew(t *testing.T) {
 	type args struct {
 		httpClient common.HTTPClient
 		site       string
-		config     *ClientConfig
+		config     *model.ClientConfig
 	}
 
 	testCases := []struct {

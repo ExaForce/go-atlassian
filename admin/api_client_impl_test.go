@@ -299,7 +299,7 @@ func TestClient_Call(t *testing.T) {
 				testCase.on(&testCase.fields)
 			}
 
-			config := &ClientConfig{
+			config := &model.ClientConfig{
 				MaxRetries:        5,
 				InitialRetryDelay: 1000,
 				MaxRetryDelay:     10000,
@@ -432,7 +432,7 @@ func TestClient_NewRequest(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			config := &ClientConfig{
+			config := &model.ClientConfig{
 				MaxRetries:        5,
 				InitialRetryDelay: 1000,
 				MaxRetryDelay:     10000,
@@ -523,7 +523,7 @@ func TestClient_processResponse(t *testing.T) {
 	}
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			config := &ClientConfig{
+			config := &model.ClientConfig{
 				MaxRetries:        5,
 				InitialRetryDelay: 1000,
 				MaxRetryDelay:     10000,
@@ -564,7 +564,7 @@ func TestNew(t *testing.T) {
 	mockClient.Auth.SetUserAgent("aaa")
 
 	// Create a client with custom config
-	customConfig := &ClientConfig{
+	customConfig := &model.ClientConfig{
 		MaxRetries:        10,
 		InitialRetryDelay: 2000,
 		MaxRetryDelay:     20000,
@@ -576,7 +576,7 @@ func TestNew(t *testing.T) {
 
 	type args struct {
 		httpClient common.HTTPClient
-		config     *ClientConfig
+		config     *model.ClientConfig
 	}
 
 	testCases := []struct {
