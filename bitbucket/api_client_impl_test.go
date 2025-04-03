@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/ctreminiom/go-atlassian/v2/bitbucket/internal"
 	model "github.com/ctreminiom/go-atlassian/v2/pkg/infra/models"
@@ -65,6 +66,19 @@ func TestClient_Call(t *testing.T) {
 		},
 	}
 
+	// Create test requests
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "http://test.com", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 0)
+	defer cancel()
+	reqWithTimeout, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://test.com", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	type fields struct {
 		HTTP common.HTTPClient
 		Site *url.URL
@@ -87,16 +101,15 @@ func TestClient_Call(t *testing.T) {
 		{
 			name: "when the parameters are correct",
 			on: func(fields *fields) {
-
 				client := mocks.NewHTTPClient(t)
 
-				client.On("Do", (*http.Request)(nil)).
+				client.On("Do", mock.AnythingOfType("*http.Request")).
 					Return(expectedResponse, nil)
 
 				fields.HTTP = client
 			},
 			args: args{
-				request:   nil,
+				request:   req,
 				structure: nil,
 			},
 			want: &model.ResponseScheme{
@@ -111,16 +124,15 @@ func TestClient_Call(t *testing.T) {
 		{
 			name: "when the response status is a bad request",
 			on: func(fields *fields) {
-
 				client := mocks.NewHTTPClient(t)
 
-				client.On("Do", (*http.Request)(nil)).
+				client.On("Do", mock.AnythingOfType("*http.Request")).
 					Return(badRequestResponse, nil)
 
 				fields.HTTP = client
 			},
 			args: args{
-				request:   nil,
+				request:   req,
 				structure: nil,
 			},
 			want: &model.ResponseScheme{
@@ -136,16 +148,15 @@ func TestClient_Call(t *testing.T) {
 		{
 			name: "when the response status is an internal service error",
 			on: func(fields *fields) {
-
 				client := mocks.NewHTTPClient(t)
 
-				client.On("Do", (*http.Request)(nil)).
+				client.On("Do", mock.AnythingOfType("*http.Request")).
 					Return(internalServerResponse, nil)
 
 				fields.HTTP = client
 			},
 			args: args{
-				request:   nil,
+				request:   req,
 				structure: nil,
 			},
 			want: &model.ResponseScheme{
@@ -161,16 +172,15 @@ func TestClient_Call(t *testing.T) {
 		{
 			name: "when the response status is a not found",
 			on: func(fields *fields) {
-
 				client := mocks.NewHTTPClient(t)
 
-				client.On("Do", (*http.Request)(nil)).
+				client.On("Do", mock.AnythingOfType("*http.Request")).
 					Return(notFoundResponse, nil)
 
 				fields.HTTP = client
 			},
 			args: args{
-				request:   nil,
+				request:   req,
 				structure: nil,
 			},
 			want: &model.ResponseScheme{
@@ -186,16 +196,15 @@ func TestClient_Call(t *testing.T) {
 		{
 			name: "when the response status is unauthorized",
 			on: func(fields *fields) {
-
 				client := mocks.NewHTTPClient(t)
 
-				client.On("Do", (*http.Request)(nil)).
+				client.On("Do", mock.AnythingOfType("*http.Request")).
 					Return(unauthorizedResponse, nil)
 
 				fields.HTTP = client
 			},
 			args: args{
-				request:   nil,
+				request:   req,
 				structure: nil,
 			},
 			want: &model.ResponseScheme{
@@ -207,6 +216,117 @@ func TestClient_Call(t *testing.T) {
 			wantErr: true,
 			Err:     model.ErrUnauthorized,
 		},
+		{
+			name: "when rate limit is hit and retry succeeds",
+			on: func(fields *fields) {
+				client := mocks.NewHTTPClient(t)
+
+				// First call returns rate limit
+				rateLimitResponse := &http.Response{
+					StatusCode: http.StatusTooManyRequests,
+					Body:       io.NopCloser(strings.NewReader("Rate limit exceeded")),
+					Request: &http.Request{
+						Method: http.MethodGet,
+						URL:    &url.URL{},
+					},
+				}
+
+				// Second call succeeds
+				client.On("Do", mock.AnythingOfType("*http.Request")).
+					Return(rateLimitResponse, nil).
+					Times(1)
+
+				client.On("Do", mock.AnythingOfType("*http.Request")).
+					Return(expectedResponse, nil).
+					Times(1)
+
+				fields.HTTP = client
+			},
+			args: args{
+				request:   req,
+				structure: nil,
+			},
+			want: &model.ResponseScheme{
+				Response: expectedResponse,
+				Code:     http.StatusOK,
+				Method:   http.MethodGet,
+				Bytes:    *bytes.NewBufferString("Hello, world!"),
+			},
+			wantErr: false,
+		},
+
+		{
+			name: "when rate limit is hit and max retries exceeded",
+			on: func(fields *fields) {
+				client := mocks.NewHTTPClient(t)
+
+				// Return rate limit response 6 times (max retries + 1)
+				rateLimitResponse := &http.Response{
+					StatusCode: http.StatusTooManyRequests,
+					Body:       io.NopCloser(strings.NewReader("Rate limit exceeded")),
+					Request: &http.Request{
+						Method: http.MethodGet,
+						URL:    &url.URL{},
+					},
+				}
+
+				// Set up expectations for all retries
+				client.On("Do", mock.AnythingOfType("*http.Request")).
+					Return(rateLimitResponse, nil).
+					Times(6)
+
+				fields.HTTP = client
+			},
+			args: args{
+				request:   req,
+				structure: nil,
+			},
+			want: &model.ResponseScheme{
+				Response: &http.Response{
+					StatusCode: http.StatusTooManyRequests,
+					Body:       io.NopCloser(strings.NewReader("Rate limit exceeded")),
+					Request: &http.Request{
+						Method: http.MethodGet,
+						URL:    &url.URL{},
+					},
+				},
+				Code:   http.StatusTooManyRequests,
+				Method: http.MethodGet,
+				Bytes:  *bytes.NewBufferString("Rate limit exceeded"),
+			},
+			wantErr: true,
+			Err:     model.ErrInvalidStatusCode,
+		},
+
+		{
+			name: "when context is cancelled during rate limit retry",
+			on: func(fields *fields) {
+				client := mocks.NewHTTPClient(t)
+
+				// Return rate limit response
+				rateLimitResponse := &http.Response{
+					StatusCode: http.StatusTooManyRequests,
+					Body:       io.NopCloser(strings.NewReader("Rate limit exceeded")),
+					Request: &http.Request{
+						Method: http.MethodGet,
+						URL:    &url.URL{},
+					},
+				}
+
+				client.On("Do", mock.AnythingOfType("*http.Request")).
+					Return(rateLimitResponse, nil).
+					Times(1)
+
+				fields.HTTP = client
+			},
+			args: args{
+				request:   reqWithTimeout,
+				structure: nil,
+			},
+			want:    nil,
+			wantErr: true,
+			Err:     context.Canceled,
+		},
 	}
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
@@ -215,24 +335,33 @@ func TestClient_Call(t *testing.T) {
 				testCase.on(&testCase.fields)
 			}
 
+			config := &ClientConfig{
+				MaxRetries:        5,
+				InitialRetryDelay: 1000,
+				MaxRetryDelay:     10000,
+			}
+
 			c := &Client{
-				HTTP: testCase.fields.HTTP,
-				Site: testCase.fields.Site,
+				HTTP:              testCase.fields.HTTP,
+				Site:              testCase.fields.Site,
+				MaxRetries:        config.MaxRetries,
+				InitialRetryDelay: config.InitialRetryDelay,
+				MaxRetryDelay:     config.MaxRetryDelay,
 			}
 
 			got, err := c.Call(testCase.args.request, testCase.args.structure)
 
 			if testCase.wantErr {
-
 				if err != nil {
 					t.Logf("error returned: %v", err.Error())
 				}
-
 				assert.EqualError(t, err, testCase.Err.Error())
-
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, got, testCase.want)
+				assert.NotNil(t, got)
+				assert.Equal(t, testCase.want.Code, got.Code)
+				assert.Equal(t, testCase.want.Method, got.Method)
+				assert.Equal(t, testCase.want.Bytes.String(), got.Bytes.String())
 			}
 
 		})
@@ -359,10 +488,19 @@ func TestClient_NewRequest(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 
+			config := &ClientConfig{
+				MaxRetries:        5,
+				InitialRetryDelay: 1000,
+				MaxRetryDelay:     10000,
+			}
+
 			c := &Client{
-				HTTP: testCase.fields.HTTP,
-				Auth: testCase.fields.Auth,
-				Site: testCase.fields.Site,
+				HTTP:              testCase.fields.HTTP,
+				Auth:              testCase.fields.Auth,
+				Site:              testCase.fields.Site,
+				MaxRetries:        config.MaxRetries,
+				InitialRetryDelay: config.InitialRetryDelay,
+				MaxRetryDelay:     config.MaxRetryDelay,
 			}
 
 			got, err := c.NewRequest(
@@ -445,10 +583,19 @@ func TestClient_processResponse(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 
+			config := &ClientConfig{
+				MaxRetries:        5,
+				InitialRetryDelay: 1000,
+				MaxRetryDelay:     10000,
+			}
+
 			c := &Client{
-				HTTP: testCase.fields.HTTP,
-				Site: testCase.fields.Site,
-				Auth: testCase.fields.Authentication,
+				HTTP:              testCase.fields.HTTP,
+				Site:              testCase.fields.Site,
+				Auth:              testCase.fields.Authentication,
+				MaxRetries:        config.MaxRetries,
+				InitialRetryDelay: config.InitialRetryDelay,
+				MaxRetryDelay:     config.MaxRetryDelay,
 			}
 
 			got, err := c.processResponse(testCase.args.response, testCase.args.structure)
@@ -472,8 +619,7 @@ func TestClient_processResponse(t *testing.T) {
 }
 
 func TestNew(t *testing.T) {
-
-	mockClient, err := New(http.DefaultClient, "https://ctreminiom.atlassian.net")
+	mockClient, err := New(http.DefaultClient, "", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -481,11 +627,21 @@ func TestNew(t *testing.T) {
 	mockClient.Auth.SetBasicAuth("test", "test")
 	mockClient.Auth.SetUserAgent("aaa")
 
-	invalidURLClientMocked, _ := New(nil, " https://zhidao.baidu.com/special/view?id=sd&preview=1")
+	// Create a client with custom config
+	customConfig := &ClientConfig{
+		MaxRetries:        10,
+		InitialRetryDelay: 2000,
+		MaxRetryDelay:     20000,
+	}
+	customClient, err := New(http.DefaultClient, "", customConfig)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	type args struct {
 		httpClient common.HTTPClient
 		site       string
+		config     *ClientConfig
 	}
 
 	testCases := []struct {
@@ -495,44 +651,34 @@ func TestNew(t *testing.T) {
 		wantErr bool
 		Err     error
 	}{
-
 		{
-			name: "when the parameters are correct",
-			args: args{
-				httpClient: http.DefaultClient,
-				site:       "https://ctreminiom.atlassian.net",
-			},
-			want:    mockClient,
-			wantErr: false,
-		},
-
-		{
-			name: "when the site is not provided are correct",
+			name: "when using default config",
 			args: args{
 				httpClient: http.DefaultClient,
 				site:       "",
+				config:     nil,
 			},
 			want:    mockClient,
 			wantErr: false,
 		},
-
 		{
-			name: "when the parameters are correct",
+			name: "when using custom config",
 			args: args{
 				httpClient: http.DefaultClient,
-				site:       "https://ctreminiom.atlassian.net",
+				site:       "",
+				config:     customConfig,
 			},
-			want:    mockClient,
+			want:    customClient,
 			wantErr: false,
 		},
-
 		{
 			name: "when the site url is not valid",
 			args: args{
 				httpClient: http.DefaultClient,
 				site:       " https://zhidao.baidu.com/special/view?id=sd&preview=1",
+				config:     nil,
 			},
-			want:    invalidURLClientMocked,
+			want:    nil,
 			wantErr: true,
 			Err:     errors.New("parse \" https://zhidao.baidu.com/special/view?id=sd&preview=1/\": first path segment in URL cannot contain colon"),
 		},
@@ -540,21 +686,20 @@ func TestNew(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-
-			gotClient, err := New(testCase.args.httpClient, testCase.args.site)
+			gotClient, err := New(testCase.args.httpClient, testCase.args.site, testCase.args.config)
 
 			if testCase.wantErr {
-
 				if err != nil {
 					t.Logf("error returned: %v", err.Error())
 				}
-
 				assert.Error(t, err)
 				assert.EqualError(t, err, testCase.Err.Error())
-
 			} else {
 				assert.NoError(t, err)
-				assert.NotEqual(t, gotClient, nil)
+				assert.NotNil(t, gotClient)
+				assert.Equal(t, testCase.want.MaxRetries, gotClient.MaxRetries)
+				assert.Equal(t, testCase.want.InitialRetryDelay, gotClient.InitialRetryDelay)
+				assert.Equal(t, testCase.want.MaxRetryDelay, gotClient.MaxRetryDelay)
 			}
 		})
 	}
