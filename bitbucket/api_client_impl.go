@@ -10,20 +10,12 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/ctreminiom/go-atlassian/v2/bitbucket/internal"
 	"github.com/ctreminiom/go-atlassian/v2/pkg/infra/models"
 	"github.com/ctreminiom/go-atlassian/v2/service/common"
 )
-
-// timerPool provides a pool of timers for rate limit retries
-var timerPool = sync.Pool{
-	New: func() interface{} {
-		return time.NewTimer(0)
-	},
-}
 
 // DefaultBitbucketSite is the default Bitbucket API site.
 const DefaultBitbucketSite = "https://api.bitbucket.org"
@@ -155,18 +147,17 @@ func (c *Client) Call(request *http.Request, structure interface{}) (*models.Res
 
 		// If rate limit exceeded, sleep with exponential backoff
 		if response.StatusCode == http.StatusTooManyRequests {
-			delay := c.InitialRetryDelay * time.Millisecond
+			delay := c.InitialRetryDelay
 			// Use bit shifting for exponential backoff (1 << retryCount)
 			delay = delay * (1 << uint(retryCount))
 			if delay > c.MaxRetryDelay {
 				delay = c.MaxRetryDelay
 			}
-			log.Printf("Rate limit exceeded, sleeping for %v milliseconds", delay.Milliseconds())
+			log.Printf("Rate limit exceeded, sleeping for %v request %v", delay, request.URL.String())
 
-			// Get timer from pool and reset it
-			timer := timerPool.Get().(*time.Timer)
-			timer.Reset(delay)
-			defer timerPool.Put(timer)
+			// Get timer
+			timer := time.NewTimer(delay)
+			defer timer.Stop()
 
 			// Wait for either context cancellation or timer
 			select {

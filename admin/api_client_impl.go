@@ -9,20 +9,12 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"sync"
 	"time"
 
 	"github.com/ctreminiom/go-atlassian/v2/admin/internal"
 	model "github.com/ctreminiom/go-atlassian/v2/pkg/infra/models"
 	"github.com/ctreminiom/go-atlassian/v2/service/common"
 )
-
-// timerPool provides a pool of timers for rate limit retries
-var timerPool = sync.Pool{
-	New: func() interface{} {
-		return time.NewTimer(0)
-	},
-}
 
 const defaultAPIEndpoint = "https://api.atlassian.com/"
 
@@ -167,18 +159,17 @@ func (c *Client) Call(request *http.Request, structure interface{}) (*model.Resp
 
 		// If rate limit exceeded, sleep with exponential backoff
 		if response.StatusCode == http.StatusTooManyRequests {
-			delay := c.InitialRetryDelay * time.Millisecond
+			delay := c.InitialRetryDelay
 			// Use bit shifting for exponential backoff (1 << retryCount)
 			delay = delay * (1 << uint(retryCount))
 			if delay > c.MaxRetryDelay {
 				delay = c.MaxRetryDelay
 			}
-			log.Printf("Rate limit exceeded, sleeping for %v milliseconds", delay.Milliseconds())
+			log.Printf("Rate limit exceeded, sleeping for %v request %v", delay, request.URL.String())
 
-			// Get timer from pool and reset it
-			timer := timerPool.Get().(*time.Timer)
-			timer.Reset(delay)
-			defer timerPool.Put(timer)
+			// Get timer
+			timer := time.NewTimer(delay)
+			defer timer.Stop()
 
 			// Wait for either context cancellation or timer
 			select {
@@ -186,6 +177,7 @@ func (c *Client) Call(request *http.Request, structure interface{}) (*model.Resp
 				timer.Stop()
 				return nil, ctx.Err()
 			case <-timer.C:
+				log.Printf("Timer completed successfully")
 				// Timer completed successfully
 			}
 
