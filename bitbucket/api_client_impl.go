@@ -43,8 +43,8 @@ func New(httpClient common.HTTPClient, site string, config *models.ClientConfig)
 	if config == nil {
 		config = &models.ClientConfig{
 			MaxRetries:        5,
-			InitialRetryDelay: 1000,
-			MaxRetryDelay:     10000,
+			InitialRetryDelay: time.Duration(1) * time.Minute,
+			MaxRetryDelay:     time.Duration(10) * time.Minute,
 		}
 	}
 
