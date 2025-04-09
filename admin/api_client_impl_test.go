@@ -190,7 +190,7 @@ func TestClient_Call(t *testing.T) {
 				Bytes:    *bytes.NewBufferString("Rate limit exceeded"),
 			},
 			wantErr: true,
-			Err:     model.ErrInvalidStatusCode,
+			Err:     model.ErrRateLimited,
 		},
 		{
 			name: "when context is cancelled during rate limit retry",

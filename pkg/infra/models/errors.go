@@ -133,6 +133,7 @@ var (
 	ErrUnauthorized                   = errors.New("client: atlassian insufficient permissions")
 	ErrInternal                       = errors.New("client: atlassian internal error")
 	ErrBadRequest                     = errors.New("client: atlassian invalid payload")
+	ErrRateLimited                    = errors.New("client: atlassian rate limited")
 	ErrNoSite                         = errors.New("client: no atlassian site set")
 	ErrNoFloatType                    = errors.New("custom-field: no float type set")
 	ErrNoSprintType                   = errors.New("custom-field: no sprint type found")

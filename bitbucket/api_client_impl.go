@@ -215,6 +215,9 @@ func (c *Client) processResponse(response *http.Response, structure interface{})
 		case http.StatusBadRequest:
 			return res, models.ErrBadRequest
 
+		case http.StatusTooManyRequests:
+			return res, models.ErrRateLimited
+
 		default:
 			return res, models.ErrInvalidStatusCode
 		}
