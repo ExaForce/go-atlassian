@@ -6,8 +6,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/ctreminiom/go-atlassian/v2/admin/internal"
 	model "github.com/ctreminiom/go-atlassian/v2/pkg/infra/models"
@@ -18,8 +20,7 @@ const defaultAPIEndpoint = "https://api.atlassian.com/"
 
 // New creates a new instance of Client.
 // It takes a common.HTTPClient as input and returns a pointer to Client and an error.
-func New(httpClient common.HTTPClient) (*Client, error) {
-
+func New(httpClient common.HTTPClient, config *model.ClientConfig) (*Client, error) {
 	// If no HTTP client is provided, use the default HTTP client.
 	if httpClient == nil {
 		httpClient = http.DefaultClient
@@ -31,10 +32,22 @@ func New(httpClient common.HTTPClient) (*Client, error) {
 		return nil, err
 	}
 
+	// Use default config if not provided
+	if config == nil {
+		config = &model.ClientConfig{
+			MaxRetries:        5,
+			InitialRetryDelay: time.Duration(1) * time.Minute,
+			MaxRetryDelay:     time.Duration(10) * time.Minute,
+		}
+	}
+
 	// Initialize the Client struct with the provided HTTP client and parsed URL.
 	client := &Client{
-		HTTP: httpClient,
-		Site: u,
+		HTTP:              httpClient,
+		Site:              u,
+		MaxRetries:        config.MaxRetries,
+		InitialRetryDelay: config.InitialRetryDelay,
+		MaxRetryDelay:     config.MaxRetryDelay,
 	}
 
 	// Initialize the Authentication service.
@@ -65,6 +78,12 @@ type Client struct {
 	HTTP common.HTTPClient
 	// Site is the base URL for the API.
 	Site *url.URL
+	// MaxRetries is the maximum number of retries for rate limit handling.
+	MaxRetries int
+	// InitialRetryDelay is the initial delay between retries.
+	InitialRetryDelay time.Duration
+	// MaxRetryDelay is the maximum delay between retries.
+	MaxRetryDelay time.Duration
 	// Auth is the authentication service.
 	Auth common.Authentication
 	// Organization is the service for organization-related operations.
@@ -129,15 +148,48 @@ func (c *Client) NewRequest(ctx context.Context, method, urlStr, contentType str
 // It takes an *http.Request and a structure to unmarshal the response into.
 // It returns a pointer to model.ResponseScheme and an error.
 func (c *Client) Call(request *http.Request, structure interface{}) (*model.ResponseScheme, error) {
+	retryCount := 0
+	ctx := request.Context()
 
-	// Perform the HTTP request.
-	response, err := c.HTTP.Do(request)
-	if err != nil {
-		return nil, err
+	for {
+		response, err := c.HTTP.Do(request)
+		if err != nil {
+			return nil, err
+		}
+
+		// If rate limit exceeded, sleep with exponential backoff
+		if response.StatusCode == http.StatusTooManyRequests {
+			delay := c.InitialRetryDelay
+			// Use bit shifting for exponential backoff (1 << retryCount)
+			delay = delay * (1 << uint(retryCount))
+			if delay > c.MaxRetryDelay {
+				delay = c.MaxRetryDelay
+			}
+			log.Printf("Rate limit exceeded, sleeping for %v request %v", delay, request.URL.String())
+
+			// Get timer
+			timer := time.NewTimer(delay)
+			defer timer.Stop()
+
+			// Wait for either context cancellation or timer
+			select {
+			case <-ctx.Done():
+				timer.Stop()
+				return nil, ctx.Err()
+			case <-timer.C:
+				log.Printf("Timer completed successfully")
+				// Timer completed successfully
+			}
+
+			retryCount++
+			if retryCount > c.MaxRetries {
+				return c.processResponse(response, structure)
+			}
+			continue
+		}
+
+		return c.processResponse(response, structure)
 	}
-
-	// Process the HTTP response.
-	return c.processResponse(response, structure)
 }
 
 func (c *Client) processResponse(response *http.Response, structure interface{}) (*model.ResponseScheme, error) {
@@ -175,6 +227,9 @@ func (c *Client) processResponse(response *http.Response, structure interface{})
 
 		case http.StatusBadRequest:
 			return res, model.ErrBadRequest
+
+		case http.StatusTooManyRequests:
+			return res, model.ErrRateLimited
 
 		default:
 			return res, model.ErrInvalidStatusCode

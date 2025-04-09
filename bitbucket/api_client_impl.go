@@ -6,9 +6,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/ctreminiom/go-atlassian/v2/bitbucket/internal"
 	"github.com/ctreminiom/go-atlassian/v2/pkg/infra/models"
@@ -19,8 +21,7 @@ import (
 const DefaultBitbucketSite = "https://api.bitbucket.org"
 
 // New creates a new Bitbucket API client.
-func New(httpClient common.HTTPClient, site string) (*Client, error) {
-
+func New(httpClient common.HTTPClient, site string, config *models.ClientConfig) (*Client, error) {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
@@ -38,9 +39,21 @@ func New(httpClient common.HTTPClient, site string) (*Client, error) {
 		return nil, err
 	}
 
+	// Use default config if not provided
+	if config == nil {
+		config = &models.ClientConfig{
+			MaxRetries:        5,
+			InitialRetryDelay: time.Duration(1) * time.Minute,
+			MaxRetryDelay:     time.Duration(10) * time.Minute,
+		}
+	}
+
 	client := &Client{
-		HTTP: httpClient,
-		Site: u,
+		HTTP:              httpClient,
+		Site:              u,
+		MaxRetries:        config.MaxRetries,
+		InitialRetryDelay: config.InitialRetryDelay,
+		MaxRetryDelay:     config.MaxRetryDelay,
 	}
 
 	client.Auth = internal.NewAuthenticationService(client)
@@ -57,10 +70,13 @@ func New(httpClient common.HTTPClient, site string) (*Client, error) {
 
 // Client is a Bitbucket API client.
 type Client struct {
-	HTTP      common.HTTPClient
-	Site      *url.URL
-	Auth      common.Authentication
-	Workspace *internal.WorkspaceService
+	HTTP              common.HTTPClient
+	Site              *url.URL
+	MaxRetries        int
+	InitialRetryDelay time.Duration
+	MaxRetryDelay     time.Duration
+	Auth              common.Authentication
+	Workspace         *internal.WorkspaceService
 }
 
 // NewRequest creates an API request.
@@ -120,13 +136,47 @@ func (c *Client) NewRequest(ctx context.Context, method, urlStr, typ string, bod
 
 // Call executes an API request and returns the response.
 func (c *Client) Call(request *http.Request, structure interface{}) (*models.ResponseScheme, error) {
+	retryCount := 0
+	ctx := request.Context()
 
-	response, err := c.HTTP.Do(request)
-	if err != nil {
-		return nil, err
+	for {
+		response, err := c.HTTP.Do(request)
+		if err != nil {
+			return nil, err
+		}
+
+		// If rate limit exceeded, sleep with exponential backoff
+		if response.StatusCode == http.StatusTooManyRequests {
+			delay := c.InitialRetryDelay
+			// Use bit shifting for exponential backoff (1 << retryCount)
+			delay = delay * (1 << uint(retryCount))
+			if delay > c.MaxRetryDelay {
+				delay = c.MaxRetryDelay
+			}
+			log.Printf("Rate limit exceeded, sleeping for %v request %v", delay, request.URL.String())
+
+			// Get timer
+			timer := time.NewTimer(delay)
+			defer timer.Stop()
+
+			// Wait for either context cancellation or timer
+			select {
+			case <-ctx.Done():
+				timer.Stop()
+				return nil, ctx.Err()
+			case <-timer.C:
+				// Timer completed successfully
+			}
+
+			retryCount++
+			if retryCount > c.MaxRetries {
+				return c.processResponse(response, structure)
+			}
+			continue
+		}
+
+		return c.processResponse(response, structure)
 	}
-
-	return c.processResponse(response, structure)
 }
 
 func (c *Client) processResponse(response *http.Response, structure interface{}) (*models.ResponseScheme, error) {
@@ -164,6 +214,9 @@ func (c *Client) processResponse(response *http.Response, structure interface{})
 
 		case http.StatusBadRequest:
 			return res, models.ErrBadRequest
+
+		case http.StatusTooManyRequests:
+			return res, models.ErrRateLimited
 
 		default:
 			return res, models.ErrInvalidStatusCode
