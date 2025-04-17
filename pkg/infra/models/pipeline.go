@@ -17,3 +17,91 @@ type RepositoryPipelineVariable struct {
 	System  bool   `json:"system"`
 	Scope   string `json:"scope"`
 }
+
+type RepositoryPipelineRunsPageScheme struct {
+	Size     int                      `json:"size"`
+	Page     int                      `json:"page"`
+	Pagelen  int                      `json:"pagelen"`
+	Next     string                   `json:"next"`
+	Previous string                   `json:"previous"`
+	Values   []*RepositoryPipelineRun `json:"values"`
+}
+
+type RepositoryPipelineRun struct {
+	Type            string              `json:"type"`
+	UUID            string              `json:"uuid"`
+	BuildNumber     int                 `json:"build_number"`
+	Creator         *PipelineCreator    `json:"creator"`
+	Repository      *PipelineRepository `json:"repository"`
+	State           *PipelineState      `json:"state"`
+	CreatedOn       string              `json:"created_on"`
+	CompletedOn     string              `json:"completed_on"`
+	Target          *PipelineTarget     `json:"target"`
+	Trigger         *PipelineTrigger    `json:"trigger"`
+	RunNumber       int                 `json:"run_number"`
+	RunCreationDate string              `json:"run_creation_date"`
+	DurationInSecs  int                 `json:"duration_in_seconds"`
+	BuildSecsUsed   int                 `json:"build_seconds_used"`
+	FirstSuccessful bool                `json:"first_successful"`
+	Expired         bool                `json:"expired"`
+	HasVariables    bool                `json:"has_variables"`
+	Labels          map[string]string   `json:"labels"`
+}
+
+type PipelineCreator struct {
+	DisplayName string `json:"display_name"`
+	Type        string `json:"type"`
+	UUID        string `json:"uuid"`
+	AccountID   string `json:"account_id"`
+	Nickname    string `json:"nickname"`
+}
+
+type PipelineRepository struct {
+	Type     string `json:"type"`
+	FullName string `json:"full_name"`
+	Name     string `json:"name"`
+	UUID     string `json:"uuid"`
+}
+
+type PipelineTarget struct {
+	Source            string               `json:"source"`
+	Destination       string               `json:"destination"`
+	DestinationCommit *PipelineCommit      `json:"destination_commit"`
+	PullRequest       *PipelinePullRequest `json:"pullrequest"`
+	Selector          *PipelineSelector    `json:"selector"`
+	Commit            *PipelineCommit      `json:"commit"`
+	Type              string               `json:"type"`
+}
+
+type PipelineCommit struct {
+	Hash string `json:"hash"`
+	Type string `json:"type"`
+}
+
+type PipelinePullRequest struct {
+	Type  string `json:"type"`
+	ID    int    `json:"id"`
+	Title string `json:"title"`
+	Draft bool   `json:"draft"`
+}
+
+type PipelineSelector struct {
+	Type    string `json:"type"`
+	Pattern string `json:"pattern"`
+}
+
+type PipelineTrigger struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
+}
+
+type PipelineState struct {
+	Name   string          `json:"name"`
+	Type   string          `json:"type"`
+	Result *PipelineResult `json:"result"`
+}
+
+type PipelineResult struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
+}
