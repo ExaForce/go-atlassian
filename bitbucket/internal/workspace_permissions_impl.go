@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
 
 	model "github.com/ctreminiom/go-atlassian/v2/pkg/infra/models"
 	"github.com/ctreminiom/go-atlassian/v2/pkg/infra/utils"
@@ -56,8 +55,8 @@ func (w *WorkspacePermissionService) Repositories(ctx context.Context, workspace
 // GET /2.0/workspaces/{workspace}/permissions/repositories/{repo_slug}
 //
 // https://docs.go-atlassian.io/bitbucket-cloud/workspace/permissions#get-repository-permission-in-a-workspace
-func (w *WorkspacePermissionService) Repository(ctx context.Context, workspace, repository, query, sort string) (*model.RepositoryPermissionPageScheme, *model.ResponseScheme, error) {
-	return w.internalClient.Repository(ctx, workspace, repository, query, sort)
+func (w *WorkspacePermissionService) Repository(ctx context.Context, workspace, repository, sort string, opts *model.PageOptions) (*model.RepositoryPermissionPageScheme, *model.ResponseScheme, error) {
+	return w.internalClient.Repository(ctx, workspace, repository, sort, opts)
 }
 
 type internalWorkspacePermissionServiceImpl struct {
@@ -147,7 +146,7 @@ func (i *internalWorkspacePermissionServiceImpl) Repositories(ctx context.Contex
 	return page, response, nil
 }
 
-func (i *internalWorkspacePermissionServiceImpl) Repository(ctx context.Context, workspace, repository, query, sort string) (*model.RepositoryPermissionPageScheme, *model.ResponseScheme, error) {
+func (i *internalWorkspacePermissionServiceImpl) Repository(ctx context.Context, workspace, repository, sort string, opts *model.PageOptions) (*model.RepositoryPermissionPageScheme, *model.ResponseScheme, error) {
 
 	if workspace == "" {
 		return nil, nil, model.ErrNoWorkspace
@@ -157,23 +156,27 @@ func (i *internalWorkspacePermissionServiceImpl) Repository(ctx context.Context,
 		return nil, nil, model.ErrNoRepository
 	}
 
-	var endpoint strings.Builder
-	endpoint.WriteString(fmt.Sprintf("2.0/workspaces/%v/permissions/repositories/%v", workspace, repository))
+	endpoint := fmt.Sprintf("2.0/workspaces/%v/permissions/repositories/%v", workspace, repository)
 
-	params := url.Values{}
-
-	if query != "" {
-		params.Add("q", query)
+	// Add pagination parameters first
+	urlStr, err := utils.AddPaginationParams(endpoint, opts)
+	if err != nil {
+		return nil, nil, err
 	}
+	// Parse the URL to add additional parameters
+	u, err := url.Parse(urlStr)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Add query and sort parameters
+	q := u.Query()
 	if sort != "" {
-		params.Add("sort", sort)
+		q.Add("sort", sort)
 	}
+	u.RawQuery = q.Encode()
 
-	if params.Encode() != "" {
-		endpoint.WriteString(fmt.Sprintf("?%v", params.Encode()))
-	}
-
-	request, err := i.c.NewRequest(ctx, http.MethodGet, endpoint.String(), "", nil)
+	request, err := i.c.NewRequest(ctx, http.MethodGet, u.String(), "", nil)
 	if err != nil {
 		return nil, nil, err
 	}
