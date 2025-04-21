@@ -117,5 +117,5 @@ type WorkspacePermissionConnector interface {
 	// GET /2.0/workspaces/{workspace}/permissions/repositories/{repo_slug}
 	//
 	// https://docs.go-atlassian.io/bitbucket-cloud/workspace/permissions#get-repository-permission-in-a-workspace
-	Repository(ctx context.Context, workspace, repository, query, sort string) (*models.RepositoryPermissionPageScheme, *models.ResponseScheme, error)
+	Repository(ctx context.Context, workspace, repository, sort string, opts *models.PageOptions) (*models.RepositoryPermissionPageScheme, *models.ResponseScheme, error)
 }

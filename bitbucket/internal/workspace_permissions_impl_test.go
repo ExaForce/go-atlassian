@@ -256,8 +256,8 @@ func Test_internalWorkspacePermissionServiceImpl_Repository(t *testing.T) {
 		ctx        context.Context
 		workspace  string
 		repository string
-		query      string
 		sort       string
+		opts       *model.PageOptions
 	}
 
 	testCases := []struct {
@@ -273,9 +273,9 @@ func Test_internalWorkspacePermissionServiceImpl_Repository(t *testing.T) {
 			args: args{
 				ctx:        context.Background(),
 				workspace:  "work-space-name-sample",
-				query:      "permission=\"owner\"",
 				sort:       "user.display_name",
 				repository: "microservice-a",
+				opts:       &model.PageOptions{Page: 1, PageLen: 10},
 			},
 			on: func(fields *fields) {
 
@@ -284,7 +284,7 @@ func Test_internalWorkspacePermissionServiceImpl_Repository(t *testing.T) {
 				client.On("NewRequest",
 					context.Background(),
 					http.MethodGet,
-					"2.0/workspaces/work-space-name-sample/permissions/repositories/microservice-a?q=permission%3D%22owner%22&sort=user.display_name",
+					"2.0/workspaces/work-space-name-sample/permissions/repositories/microservice-a?page=1&pagelen=10&sort=user.display_name",
 					"", nil).
 					Return(&http.Request{}, nil)
 
@@ -302,9 +302,9 @@ func Test_internalWorkspacePermissionServiceImpl_Repository(t *testing.T) {
 			args: args{
 				ctx:        context.Background(),
 				workspace:  "work-space-name-sample",
-				query:      "permission=\"owner\"",
 				sort:       "user.display_name",
 				repository: "microservice-a",
+				opts:       &model.PageOptions{Page: 1, PageLen: 10},
 			},
 			on: func(fields *fields) {
 
@@ -313,7 +313,7 @@ func Test_internalWorkspacePermissionServiceImpl_Repository(t *testing.T) {
 				client.On("NewRequest",
 					context.Background(),
 					http.MethodGet,
-					"2.0/workspaces/work-space-name-sample/permissions/repositories/microservice-a?q=permission%3D%22owner%22&sort=user.display_name",
+					"2.0/workspaces/work-space-name-sample/permissions/repositories/microservice-a?page=1&pagelen=10&sort=user.display_name",
 					"", nil).
 					Return(&http.Request{}, errors.New("error, unable to create the http request"))
 
@@ -355,7 +355,7 @@ func Test_internalWorkspacePermissionServiceImpl_Repository(t *testing.T) {
 			newService := NewWorkspacePermissionService(testCase.fields.c)
 
 			gotResult, gotResponse, err := newService.Repository(testCase.args.ctx, testCase.args.workspace, testCase.args.repository,
-				testCase.args.query, testCase.args.sort)
+				testCase.args.sort, testCase.args.opts)
 
 			if testCase.wantErr {
 
