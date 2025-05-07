@@ -64,16 +64,12 @@ type RepositoryPipelineRunStep struct {
 	CompletedOn       string                 `json:"completed_on"`
 	State             *PipelineStepState     `json:"state"`
 	Image             map[string]interface{} `json:"image"`
-	SetupCommands     []*PipelineCommand     `json:"setup_commands"`
-	ScriptCommands    []*PipelineCommand     `json:"script_commands"`
-	TeardownCommands  []*PipelineCommand     `json:"teardown_commands"`
 	MaxTime           int                    `json:"maxTime"`
 	BuildSecondsUsed  int                    `json:"build_seconds_used"`
 	Name              string                 `json:"name"`
 	Trigger           *PipelineStepTrigger   `json:"trigger"`
 	DurationInSeconds int                    `json:"duration_in_seconds"`
 	RunNumber         int                    `json:"run_number"`
-	Pipeline          *PipelineReference     `json:"pipeline"`
 }
 
 type PipelineCommand struct {
