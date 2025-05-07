@@ -48,6 +48,57 @@ type RepositoryPipelineRun struct {
 	Labels          map[string]string   `json:"labels"`
 }
 
+type RepositoryPipelineRunStepsPageScheme struct {
+	Size     int                          `json:"size"`
+	Page     int                          `json:"page"`
+	Pagelen  int                          `json:"pagelen"`
+	Next     string                       `json:"next"`
+	Previous string                       `json:"previous"`
+	Values   []*RepositoryPipelineRunStep `json:"values"`
+}
+
+type RepositoryPipelineRunStep struct {
+	Type              string                 `json:"type"`
+	UUID              string                 `json:"uuid"`
+	StartedOn         string                 `json:"started_on"`
+	CompletedOn       string                 `json:"completed_on"`
+	State             *PipelineStepState     `json:"state"`
+	Image             map[string]interface{} `json:"image"`
+	MaxTime           int                    `json:"maxTime"`
+	BuildSecondsUsed  int                    `json:"build_seconds_used"`
+	Name              string                 `json:"name"`
+	Trigger           *PipelineStepTrigger   `json:"trigger"`
+	DurationInSeconds int                    `json:"duration_in_seconds"`
+	RunNumber         int                    `json:"run_number"`
+}
+
+type PipelineCommand struct {
+	CommandType string `json:"commandType"`
+	Name        string `json:"name"`
+	Command     string `json:"command"`
+	Action      string `json:"action,omitempty"`
+}
+
+type PipelineStepTrigger struct {
+	Type string `json:"type"`
+}
+
+type PipelineReference struct {
+	Type string `json:"type"`
+	UUID string `json:"uuid"`
+}
+
+type PipelineStepState struct {
+	Name   string              `json:"name"`
+	Type   string              `json:"type"`
+	Result *PipelineStepResult `json:"result,omitempty"`
+}
+
+type PipelineStepResult struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
+}
+
 type PipelineCreator struct {
 	DisplayName string `json:"display_name"`
 	Type        string `json:"type"`
