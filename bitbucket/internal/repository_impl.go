@@ -389,3 +389,47 @@ func (i *internalRepositoryServiceImpl) ListRepositoryPipelineRuns(ctx context.C
 
 	return pipelineRuns, response, nil
 }
+
+// ListRepositoryPipelineRunSteps returns a paginated list of all pipeline run steps for the specified pipeline run
+//
+// GET /2.0/repositories/{workspace}/{repo_slug}/pipelines/{pipeline_uuid}/steps
+//
+// https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-repositories-workspace-repo-slug-pipelines-pipeline-uuid-steps-get
+func (r *RepositoryService) ListRepositoryPipelineRunSteps(ctx context.Context, workspace, repoSlug string, pipelineUUID string, opts *model.PageOptions) (*model.RepositoryPipelineRunStepsPageScheme, *model.ResponseScheme, error) {
+	return r.internalClient.ListRepositoryPipelineRunSteps(ctx, workspace, repoSlug, pipelineUUID, opts)
+}
+
+func (i *internalRepositoryServiceImpl) ListRepositoryPipelineRunSteps(ctx context.Context, workspace, repoSlug string, pipelineUUID string, opts *model.PageOptions) (*model.RepositoryPipelineRunStepsPageScheme, *model.ResponseScheme, error) {
+	if workspace == "" {
+		return nil, nil, model.ErrNoWorkspace
+	}
+
+	if repoSlug == "" {
+		return nil, nil, model.ErrNoRepository
+	}
+
+	if pipelineUUID == "" {
+		return nil, nil, model.ErrNoPipelineUUID
+	}
+
+	endpoint := fmt.Sprintf("2.0/repositories/%v/%v/pipelines/%v/steps", workspace, repoSlug, pipelineUUID)
+
+	// Add pagination parameters
+	urlStr, err := utils.AddPaginationParams(endpoint, opts)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	request, err := i.c.NewRequest(ctx, http.MethodGet, urlStr, "", nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	pipelineRunSteps := new(model.RepositoryPipelineRunStepsPageScheme)
+	response, err := i.c.Call(request, pipelineRunSteps)
+	if err != nil {
+		return nil, response, err
+	}
+
+	return pipelineRunSteps, response, nil
+}
