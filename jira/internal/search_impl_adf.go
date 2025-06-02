@@ -3,13 +3,14 @@ package internal
 import (
 	"context"
 	"fmt"
-	model "github.com/ctreminiom/go-atlassian/v2/pkg/infra/models"
-	"github.com/ctreminiom/go-atlassian/v2/service"
-	"github.com/ctreminiom/go-atlassian/v2/service/jira"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
+
+	model "github.com/ctreminiom/go-atlassian/v2/pkg/infra/models"
+	"github.com/ctreminiom/go-atlassian/v2/service"
+	"github.com/ctreminiom/go-atlassian/v2/service/jira"
 )
 
 // SearchADFService provides methods to manage advanced document format (ADF) searches in Jira Service Management.
@@ -70,9 +71,9 @@ func (i *internalSearchADFImpl) Checks(ctx context.Context, payload *model.Issue
 
 func (i *internalSearchADFImpl) Get(ctx context.Context, jql string, fields, expands []string, startAt, maxResults int, validate string) (*model.IssueSearchScheme, *model.ResponseScheme, error) {
 
-	if jql == "" {
-		return nil, nil, model.ErrNoJQL
-	}
+	// if jql == "" {
+	// 	return nil, nil, model.ErrNoJQL
+	// }
 
 	params := url.Values{}
 	params.Add("jql", jql)
