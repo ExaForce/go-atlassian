@@ -123,8 +123,8 @@ type IssueFieldsScheme struct {
 	StatusCategoryChangeDate *DateTimeScheme            `json:"statuscategorychangedate,omitempty"` // The date the status category changed.
 	LastViewed               string                     `json:"lastViewed,omitempty"`               // The last time the issue was viewed.
 	Summary                  string                     `json:"summary,omitempty"`                  // The summary of the issue.
-	Created                  *DateTimeScheme            `json:"created,omitempty"`                  // The date the issue was created.
-	Updated                  *DateTimeScheme            `json:"updated,omitempty"`                  // The date the issue was last updated.
+	Created                  string                     `json:"created,omitempty"`                  // The date the issue was created.
+	Updated                  string                     `json:"updated,omitempty"`                  // The date the issue was last updated.
 	Labels                   []string                   `json:"labels,omitempty"`                   // The labels associated with the issue.
 	Status                   *StatusScheme              `json:"status,omitempty"`                   // The status of the issue.
 	Description              *CommentNodeScheme         `json:"description,omitempty"`              // The description of the issue.

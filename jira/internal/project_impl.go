@@ -107,6 +107,15 @@ func (p *ProjectService) Get(ctx context.Context, projectKeyOrID string, expand 
 	return p.internalClient.Get(ctx, projectKeyOrID, expand)
 }
 
+// Gets returns the project details for a list of projects.
+//
+// GET /rest/api/{2-3}project
+//
+// https://docs.go-atlassian.io/jira-software-cloud/projects#get-project
+func (p *ProjectService) Gets(ctx context.Context, expand []string) ([]*model.ProjectScheme, *model.ResponseScheme, error) {
+	return p.internalClient.Gets(ctx, expand)
+}
+
 // Update updates the project details of a project.
 //
 // PUT /rest/api/{2-3}/project/{projectKeyOrID}
@@ -305,6 +314,33 @@ func (i *internalProjectImpl) Get(ctx context.Context, projectKeyOrID string, ex
 	}
 
 	return project, response, nil
+}
+
+func (i *internalProjectImpl) Gets(ctx context.Context, expand []string) ([]*model.ProjectScheme, *model.ResponseScheme, error) {
+
+	var endpoint strings.Builder
+	endpoint.WriteString(fmt.Sprintf("rest/api/%v/project", i.version))
+
+	if expand != nil {
+
+		params := url.Values{}
+		params.Add("expand", strings.Join(expand, ","))
+
+		endpoint.WriteString(fmt.Sprintf("?%v", params.Encode()))
+	}
+
+	request, err := i.c.NewRequest(ctx, http.MethodGet, endpoint.String(), "", nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	projects := new([]*model.ProjectScheme)
+	response, err := i.c.Call(request, projects)
+	if err != nil {
+		return nil, response, err
+	}
+
+	return *projects, response, nil
 }
 
 func (i *internalProjectImpl) Update(ctx context.Context, projectKeyOrID string, payload *model.ProjectUpdateScheme) (*model.ProjectScheme, *model.ResponseScheme, error) {

@@ -29,6 +29,13 @@ type ProjectConnector interface {
 	// https://docs.go-atlassian.io/jira-software-cloud/projects#get-project
 	Get(ctx context.Context, projectKeyOrID string, expand []string) (*model.ProjectScheme, *model.ResponseScheme, error)
 
+	// Gets returns the project details for a list of projects.
+	//
+	// GET /rest/api/{2-3}project
+	//
+	// https://docs.go-atlassian.io/jira-software-cloud/projects#get-project
+	Gets(ctx context.Context, expand []string) ([]*model.ProjectScheme, *model.ResponseScheme, error)
+
 	// Update updates the project details of a project.
 	//
 	// PUT /rest/api/{2-3}/project/{projectKeyOrID}

@@ -85,7 +85,7 @@ func (i *internalUserSearchImpl) Check(ctx context.Context, permission string, o
 	params := url.Values{}
 	params.Add("startAt", strconv.Itoa(startAt))
 	params.Add("maxResults", strconv.Itoa(maxResults))
-	params.Add("permission", permission)
+	params.Add("permissions", permission)
 
 	if options != nil {
 
