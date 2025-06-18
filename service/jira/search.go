@@ -2,6 +2,7 @@ package jira
 
 import (
 	"context"
+
 	model "github.com/ctreminiom/go-atlassian/v2/pkg/infra/models"
 )
 
@@ -42,6 +43,13 @@ type SearchADFConnector interface {
 	//
 	// https://docs.go-atlassian.io/jira-software-cloud/issues/search#search-for-issues-using-jql-get
 	Get(ctx context.Context, jql string, fields, expands []string, startAt, maxResults int, validate string) (*model.IssueSearchScheme, *model.ResponseScheme, error)
+
+	// GetByJQLSearch search issues using JQL query under the HTTP Method GET
+	//
+	// GET /rest/api/3/search/jql?jql=jql&fields=fields&failFast=failFast&nextPageToken=nextPageToken
+	//
+	// https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-jql-get
+	GetByJQLSearch(ctx context.Context, jql string, fields string, failFast bool, nextPageToken string) (*model.IssueSearchJQLScheme, *model.ResponseScheme, error)
 
 	// Post search issues using JQL query under the HTTP Method POST
 	//

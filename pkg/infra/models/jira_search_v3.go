@@ -10,6 +10,12 @@ type IssueSearchScheme struct {
 	WarningMessages []string       `json:"warningMessages,omitempty"` // Any warning messages generated during the search.
 }
 
+type IssueSearchJQLScheme struct {
+	Issues        []*IssueScheme `json:"issues,omitempty"`        // The issues returned in the results.
+	IsLast        bool           `json:"isLast,omitempty"`        // Whether this is the last page of results.
+	NextPageToken string         `json:"nextPageToken,omitempty"` // The token for the next page of results.
+}
+
 // IssueTransitionsScheme represents the transitions of an issue in Jira.
 type IssueTransitionsScheme struct {
 	Expand      string                   `json:"expand,omitempty"`      // The fields that are expanded in the results.

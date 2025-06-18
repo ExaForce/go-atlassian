@@ -46,6 +46,15 @@ func (s *SearchADFService) Post(ctx context.Context, jql string, fields, expands
 	return s.internalClient.Post(ctx, jql, fields, expands, startAt, maxResults, validate)
 }
 
+// GetByJQLSearch search issues using JQL query under the HTTP Method GET
+//
+// GET /rest/api/3/search/jql?jql=jql&fields=fields&failFast=failFast
+//
+// https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-jql-get
+func (s *SearchADFService) GetByJQLSearch(ctx context.Context, jql string, fields string, failFast bool, nextPageToken string) (*model.IssueSearchJQLScheme, *model.ResponseScheme, error) {
+	return s.internalClient.GetByJQLSearch(ctx, jql, fields, failFast, nextPageToken)
+}
+
 type internalSearchADFImpl struct {
 	c       service.Connector
 	version string
@@ -100,6 +109,37 @@ func (i *internalSearchADFImpl) Get(ctx context.Context, jql string, fields, exp
 	}
 
 	issues := new(model.IssueSearchScheme)
+	response, err := i.c.Call(request, issues)
+	if err != nil {
+		return nil, response, err
+	}
+
+	return issues, response, nil
+}
+
+func (i *internalSearchADFImpl) GetByJQLSearch(ctx context.Context, jql string, fields string, failFast bool, nextPageToken string) (*model.IssueSearchJQLScheme, *model.ResponseScheme, error) {
+
+	if jql == "" {
+		return nil, nil, model.ErrNoJQL
+	}
+
+	params := url.Values{}
+	params.Add("jql", jql)
+	params.Add("fields", fields)
+	params.Add("failFast", strconv.FormatBool(failFast))
+	if nextPageToken != "" {
+		params.Add("nextPageToken", nextPageToken)
+	}
+
+	endpoint := fmt.Sprintf("rest/api/%v/search/jql?%v", i.version, params.Encode())
+	fmt.Println("endpoint get by jql search", endpoint)
+
+	request, err := i.c.NewRequest(ctx, http.MethodGet, endpoint, "", nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	issues := new(model.IssueSearchJQLScheme)
 	response, err := i.c.Call(request, issues)
 	if err != nil {
 		return nil, response, err
