@@ -203,8 +203,13 @@ type OrganizationEventActorOnBehalfOfModel struct {
 
 // OrganizationEventActorAppModel represents the app of an actor.
 type OrganizationEventActorAppModel struct {
-	ID   string `json:"id,omitempty"`   // The ID of the app.
-	Type string `json:"type,omitempty"` // The type of the app.
+	ID         string `json:"id,omitempty"`   // The ID of the app.
+	Type       string `json:"type,omitempty"` // The type of the app.
+	Attributes struct {
+		Name  string `json:"name,omitempty"`  // The name of the app.
+		ID    string `json:"id,omitempty"`    // The ID of the app.
+		Email string `json:"email,omitempty"` // The email of the app.
+	} `json:"attributes,omitempty"` // The attributes of the app.
 }
 
 // OrganizationEventObjectModel represents an object in the context or container of an event.
