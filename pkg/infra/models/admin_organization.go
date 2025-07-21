@@ -178,9 +178,33 @@ type OrganizationEventModelAttributesScheme struct {
 
 // OrganizationEventActorModel represents the actor of an event.
 type OrganizationEventActorModel struct {
-	ID    string               `json:"id,omitempty"`    // The ID of the actor.
-	Name  string               `json:"name,omitempty"`  // The name of the actor.
-	Links *LinkSelfModelScheme `json:"links,omitempty"` // Links related to the actor.
+	ID         string                                 `json:"id,omitempty"`         // The ID of the actor.
+	Name       string                                 `json:"name,omitempty"`       // The name of the actor.
+	Email      string                                 `json:"email,omitempty"`      // The email of the actor.
+	Auth       *OrganizationEventActorAuthModel       `json:"auth,omitempty"`       // The auth of the actor.
+	OnBehalfOf *OrganizationEventActorOnBehalfOfModel `json:"onBehalfOf,omitempty"` // The on behalf of of the actor.
+	App        *OrganizationEventActorAppModel        `json:"app,omitempty"`        // The app of the actor.
+	Links      *LinkSelfModelScheme                   `json:"links,omitempty"`      // Links related to the actor.
+}
+
+// OrganizationEventActorAuthModel represents the auth of an actor.
+type OrganizationEventActorAuthModel struct {
+	AuthType   string `json:"authType,omitempty"`   // The type of auth.
+	TokenID    string `json:"tokenId,omitempty"`    // The ID of the token.
+	TokenLabel string `json:"tokenLabel,omitempty"` // The label of the token.
+}
+
+// OrganizationEventActorOnBehalfOfModel represents the on behalf of of an actor.
+type OrganizationEventActorOnBehalfOfModel struct {
+	ID    string `json:"id,omitempty"`    // The ID of the on behalf of.
+	Name  string `json:"name,omitempty"`  // The name of the on behalf of.
+	Email string `json:"email,omitempty"` // The email of the on behalf of.
+}
+
+// OrganizationEventActorAppModel represents the app of an actor.
+type OrganizationEventActorAppModel struct {
+	ID   string `json:"id,omitempty"`   // The ID of the app.
+	Type string `json:"type,omitempty"` // The type of the app.
 }
 
 // OrganizationEventObjectModel represents an object in the context or container of an event.
