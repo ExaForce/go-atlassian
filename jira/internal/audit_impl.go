@@ -3,13 +3,18 @@ package internal
 import (
 	"context"
 	"fmt"
-	model "github.com/ctreminiom/go-atlassian/v2/pkg/infra/models"
-	"github.com/ctreminiom/go-atlassian/v2/service"
-	"github.com/ctreminiom/go-atlassian/v2/service/jira"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
+
+	model "github.com/ctreminiom/go-atlassian/v2/pkg/infra/models"
+	"github.com/ctreminiom/go-atlassian/v2/service"
+	"github.com/ctreminiom/go-atlassian/v2/service/jira"
+)
+
+const (
+	jiraTimeFormat = "2006-01-02T15:04:05.000Z"
 )
 
 // NewAuditRecordService creates a new instance of AuditRecordService.
@@ -59,11 +64,11 @@ func (i *internalAuditRecordImpl) Get(ctx context.Context, options *model.AuditR
 		}
 
 		if !options.To.IsZero() {
-			params.Add("to", options.To.Format("2006-01-02"))
+			params.Add("to", options.To.Format(jiraTimeFormat))
 		}
 
 		if !options.From.IsZero() {
-			params.Add("from", options.From.Format("2006-01-02"))
+			params.Add("from", options.From.Format(jiraTimeFormat))
 		}
 
 	}
