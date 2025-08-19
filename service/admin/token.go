@@ -24,3 +24,23 @@ type UserTokenConnector interface {
 	// https://docs.go-atlassian.io/atlassian-admin-cloud/user/token#delete-api-token
 	Delete(ctx context.Context, accountID, tokenID string) (*model.ResponseScheme, error)
 }
+
+type OrgTokenConnector interface {
+
+	// Gets gets the API tokens owned by the specified organization.
+	//
+	// GET /admin/api-access/v1/orgs/{orgID}/api-tokens
+	//
+	// https://developer.atlassian.com/cloud/admin/api-access/rest/api-group-api-key/#api-orgs-orgid-api-keys-get
+	Gets(ctx context.Context, orgID string, params *model.OrgTokenQueryParams) (*model.OrgTokenPageScheme, *model.ResponseScheme, error)
+}
+
+type OrgKeyConnector interface {
+
+	// Gets gets the API keys owned by the specified organization.
+	//
+	// GET /admin/api-access/v1/orgs/{orgID}/api-keys
+	//
+	// https://developer.atlassian.com/cloud/admin/api-access/rest/api-group-api-key/#api-orgs-orgid-api-keys-get
+	Gets(ctx context.Context, orgID string, params *model.OrgTokenQueryParams) (*model.OrgKeyPageScheme, *model.ResponseScheme, error)
+}

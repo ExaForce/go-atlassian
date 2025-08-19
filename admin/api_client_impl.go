@@ -64,7 +64,10 @@ func New(httpClient common.HTTPClient, config *model.ClientConfig) (*Client, err
 	client.Organization = internal.NewOrganizationService(
 		client,
 		internal.NewOrganizationPolicyService(client),
-		internal.NewOrganizationDirectoryService(client))
+		internal.NewOrganizationDirectoryService(client),
+		internal.NewOrgTokenService(client),
+		internal.NewOrgKeyService(client),
+	)
 
 	// Initialize the User service with a user token service.
 	client.User = internal.NewUserService(client, internal.NewUserTokenService(client))

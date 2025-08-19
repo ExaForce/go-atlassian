@@ -14,8 +14,18 @@ import (
 )
 
 // NewOrganizationService creates a new instance of the OrganizationService.
-func NewOrganizationService(client service.Connector, policy *OrganizationPolicyService, directory *OrganizationDirectoryService) *OrganizationService {
-	return &OrganizationService{internalClient: &internalOrganizationImpl{c: client}, Policy: policy, Directory: directory}
+func NewOrganizationService(client service.Connector,
+	policy *OrganizationPolicyService,
+	directory *OrganizationDirectoryService,
+	token *OrgTokenService,
+	key *OrgKeyService) *OrganizationService {
+	return &OrganizationService{
+		internalClient: &internalOrganizationImpl{c: client},
+		Policy:         policy,
+		Directory:      directory,
+		Token:          token,
+		Key:            key,
+	}
 }
 
 // OrganizationService handles communication with the organization related methods of the Atlassian Admin API.
@@ -23,6 +33,8 @@ type OrganizationService struct {
 	internalClient admin.OrganizationConnector
 	Policy         *OrganizationPolicyService
 	Directory      *OrganizationDirectoryService
+	Token          *OrgTokenService
+	Key            *OrgKeyService
 }
 
 // Gets returns a list of your organizations (based on your API key).

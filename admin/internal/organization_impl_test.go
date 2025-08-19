@@ -94,7 +94,7 @@ func Test_internalOrganizationImpl_Gets(t *testing.T) {
 				testCase.on(&testCase.fields)
 			}
 
-			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil)
+			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil, nil, nil)
 
 			gotResult, gotResponse, err := newOrganizationService.Gets(testCase.args.ctx, testCase.args.cursor)
 
@@ -207,7 +207,7 @@ func Test_internalOrganizationImpl_Get(t *testing.T) {
 				testCase.on(&testCase.fields)
 			}
 
-			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil)
+			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil, nil, nil)
 
 			gotResult, gotResponse, err := newOrganizationService.Get(testCase.args.ctx, testCase.args.organizationID)
 
@@ -322,7 +322,7 @@ func Test_internalOrganizationImpl_Users(t *testing.T) {
 				testCase.on(&testCase.fields)
 			}
 
-			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil)
+			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil, nil, nil)
 
 			gotResult, gotResponse, err := newOrganizationService.Users(testCase.args.ctx, testCase.args.organizationID, testCase.args.cursor)
 
@@ -437,7 +437,7 @@ func Test_internalOrganizationImpl_Domains(t *testing.T) {
 				testCase.on(&testCase.fields)
 			}
 
-			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil)
+			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil, nil, nil)
 
 			gotResult, gotResponse, err := newOrganizationService.Domains(testCase.args.ctx, testCase.args.organizationID, testCase.args.cursor)
 
@@ -562,7 +562,7 @@ func Test_internalOrganizationImpl_Domain(t *testing.T) {
 				testCase.on(&testCase.fields)
 			}
 
-			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil)
+			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil, nil, nil)
 
 			gotResult, gotResponse, err := newOrganizationService.Domain(testCase.args.ctx, testCase.args.organizationID, testCase.args.domainID)
 
@@ -701,7 +701,7 @@ func Test_internalOrganizationImpl_Events(t *testing.T) {
 				testCase.on(&testCase.fields)
 			}
 
-			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil)
+			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil, nil, nil)
 
 			gotResult, gotResponse, err := newOrganizationService.Events(testCase.args.ctx, testCase.args.organizationID,
 				testCase.args.options, testCase.args.cursor)
@@ -827,7 +827,7 @@ func Test_internalOrganizationImpl_Event(t *testing.T) {
 				testCase.on(&testCase.fields)
 			}
 
-			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil)
+			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil, nil, nil)
 
 			gotResult, gotResponse, err := newOrganizationService.Event(testCase.args.ctx, testCase.args.organizationID, testCase.args.eventID)
 
@@ -930,7 +930,7 @@ func Test_internalOrganizationImpl_Actions(t *testing.T) {
 				testCase.on(&testCase.fields)
 			}
 
-			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil)
+			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil, nil, nil)
 
 			gotResult, gotResponse, err := newOrganizationService.Actions(testCase.args.ctx, testCase.args.organizationID)
 
@@ -1081,7 +1081,7 @@ func Test_internalOrganizationImpl_SearchUsers(t *testing.T) {
 				testCase.on(&testCase.fields)
 			}
 
-			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil)
+			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil, nil, nil)
 
 			gotResult, gotResponse, err := newOrganizationService.SearchUsers(testCase.args.ctx, testCase.args.organizationID, testCase.args.params)
 
@@ -1209,7 +1209,7 @@ func Test_internalOrganizationImpl_GetUsersV2(t *testing.T) {
 				testCase.on(&testCase.fields)
 			}
 
-			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil)
+			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil, nil, nil)
 
 			gotResult, gotResponse, err := newOrganizationService.GetUsersV2(testCase.args.ctx, testCase.args.organizationID, testCase.args.directoryID, testCase.args.params)
 
@@ -1356,7 +1356,7 @@ func Test_internalOrganizationImpl_SearchGroups(t *testing.T) {
 				testCase.on(&testCase.fields)
 			}
 
-			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil)
+			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil, nil, nil)
 
 			gotResult, gotResponse, err := newOrganizationService.SearchGroups(testCase.args.ctx, testCase.args.organizationID, testCase.args.params)
 
@@ -1536,7 +1536,7 @@ func Test_internalOrganizationImpl_SearchWorkspaces(t *testing.T) {
 				testCase.on(&testCase.fields)
 			}
 
-			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil)
+			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil, nil, nil)
 
 			gotResult, gotResponse, err := newOrganizationService.SearchWorkspaces(testCase.args.ctx, testCase.args.organizationID, testCase.args.params)
 
