@@ -31,8 +31,8 @@ type OrgTokenConnector interface {
 	//
 	// GET /admin/api-access/v1/orgs/{orgID}/api-tokens
 	//
-	// https://docs.go-atlassian.io/atlassian-admin-cloud/org/token#get-api-tokens
-	Gets(ctx context.Context, orgID string) (*model.OrgTokenPageScheme, *model.ResponseScheme, error)
+	// https://developer.atlassian.com/cloud/admin/api-access/rest/api-group-api-key/#api-orgs-orgid-api-keys-get
+	Gets(ctx context.Context, orgID string, params *model.OrgTokenQueryParams) (*model.OrgTokenPageScheme, *model.ResponseScheme, error)
 }
 
 type OrgKeyConnector interface {
@@ -41,6 +41,6 @@ type OrgKeyConnector interface {
 	//
 	// GET /admin/api-access/v1/orgs/{orgID}/api-keys
 	//
-	// https://docs.go-atlassian.io/atlassian-admin-cloud/org/key#get-api-keys
-	Gets(ctx context.Context, orgID string) (*model.OrgKeyPageScheme, *model.ResponseScheme, error)
+	// https://developer.atlassian.com/cloud/admin/api-access/rest/api-group-api-key/#api-orgs-orgid-api-keys-get
+	Gets(ctx context.Context, orgID string, params *model.OrgTokenQueryParams) (*model.OrgKeyPageScheme, *model.ResponseScheme, error)
 }

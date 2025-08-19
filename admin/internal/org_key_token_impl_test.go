@@ -104,7 +104,7 @@ func Test_internalOrgTokenImpl_Gets(t *testing.T) {
 
 			newOrgTokenService := NewOrgTokenService(testCase.fields.c)
 
-			gotResult, gotResponse, err := newOrgTokenService.Gets(testCase.args.ctx, testCase.args.orgID)
+			gotResult, gotResponse, err := newOrgTokenService.Gets(testCase.args.ctx, testCase.args.orgID, nil)
 
 			if testCase.wantErr {
 
@@ -216,7 +216,7 @@ func Test_internalOrgKeyImpl_Gets(t *testing.T) {
 
 			newOrgKeyService := NewOrgKeyService(testCase.fields.c)
 
-			gotResult, gotResponse, err := newOrgKeyService.Gets(testCase.args.ctx, testCase.args.orgID)
+			gotResult, gotResponse, err := newOrgKeyService.Gets(testCase.args.ctx, testCase.args.orgID, nil)
 
 			if testCase.wantErr {
 

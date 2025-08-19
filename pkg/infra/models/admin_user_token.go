@@ -65,3 +65,8 @@ type OrgTokenScheme struct {
 	User         *OrgKeyUserScheme `json:"user,omitempty"`         // The user associated with the token.
 	CreatedBy    *OrgKeyUserScheme `json:"createdBy,omitempty"`    // The user who created the token (may be null).
 }
+
+type OrgTokenQueryParams struct {
+	PageSize int    `json:"pageSize,omitempty"`
+	Cursor   string `json:"cursor,omitempty"`
+}
