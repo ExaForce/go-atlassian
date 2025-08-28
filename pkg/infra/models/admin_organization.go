@@ -136,6 +136,7 @@ type OrganizationEventOptScheme struct {
 	Q      string    //Single query term for searching events.
 	From   time.Time //The earliest date and time of the event represented as a UNIX epoch time.
 	To     time.Time //The latest date and time of the event represented as a UNIX epoch time.
+	Limit  int       //The maximum number of events to return(Max allowed is 500).
 	Action string    //A query filter that returns events of a specific action type.
 }
 
