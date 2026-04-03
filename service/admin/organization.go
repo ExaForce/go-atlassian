@@ -87,6 +87,13 @@ type OrganizationConnector interface {
 	// https://developer.atlassian.com/cloud/admin/organization/rest/api-group-groups/#api-v1-orgs-orgid-groups-search-post
 	SearchGroups(ctx context.Context, organizationID string, payload *model.OrganizationGroupSearchParams) (*model.OrganizationGroupSearchPage, *model.ResponseScheme, error)
 
+	// GetGroupsV2 returns a list of groups in an organization via the v2 directory endpoint.
+	//
+	// GET /admin/v2/orgs/{organizationID}/directories/{directoryID}/groups
+	//
+	// https://developer.atlassian.com/cloud/admin/organization/rest/api-group-groups/#api-v2-orgs-orgid-directories-directoryid-groups-get
+	GetGroupsV2(ctx context.Context, organizationID string, directoryID string, params *model.OrganizationGetGroupsV2Params) (*model.OrganizationGroupsV2Page, *model.ResponseScheme, error)
+
 	// SearchWorkspaces searches for workspaces within an organization with the specified filters
 	//
 	// POST /v2/orgs/{organizationID}/workspaces
