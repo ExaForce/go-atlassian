@@ -431,6 +431,50 @@ type GroupUser struct {
 	Email         string `json:"email,omitempty"`
 }
 
+// OrganizationGetGroupsV2Params represents the parameters for getting groups via the v2 directory endpoint
+type OrganizationGetGroupsV2Params struct {
+	Cursor string `json:"cursor,omitempty"`
+	Limit  int    `json:"limit,omitempty"`
+}
+
+// OrganizationGroupsV2Page represents a page of groups from the v2 directory endpoint
+//
+// GET /admin/v2/orgs/{organizationID}/directories/{directoryID}/groups
+type OrganizationGroupsV2Page struct {
+	Data  []OrganizationGroupV2 `json:"data,omitempty"`
+	Links struct {
+		Next *string `json:"next,omitempty"`
+		Prev *string `json:"prev,omitempty"`
+		Self string  `json:"self,omitempty"`
+	} `json:"links,omitempty"`
+}
+
+// OrganizationGroupV2 represents a group returned from the v2 directory endpoint
+type OrganizationGroupV2 struct {
+	ID               string                         `json:"id,omitempty"`
+	Name             string                         `json:"name,omitempty"`
+	Description      string                         `json:"description,omitempty"`
+	DirectoryID      string                         `json:"directoryId,omitempty"`
+	ManagementAccess *OrganizationGroupV2MgmtAccess `json:"managementAccess,omitempty"`
+	ExternalSynced   bool                           `json:"externalSynced,omitempty"`
+	ManagedBy        *string                        `json:"managedBy,omitempty"`
+	Counts           *OrganizationGroupV2Counts     `json:"counts,omitempty"`
+	Links            *LinkSelfModelScheme           `json:"links,omitempty"`
+}
+
+// OrganizationGroupV2Counts represents the counts for a group
+type OrganizationGroupV2Counts struct {
+	Users     int `json:"users,omitempty"`
+	Resources int `json:"resources,omitempty"`
+}
+
+// OrganizationGroupV2MgmtAccess represents the management access permissions for a group
+type OrganizationGroupV2MgmtAccess struct {
+	Deletable  bool `json:"deletable,omitempty"`
+	Modifiable bool `json:"modifiable,omitempty"`
+	Readable   bool `json:"readable,omitempty"`
+}
+
 // WorkspaceSearchParams represents the parameters for searching workspaces in an organization
 type WorkspaceSearchParams struct {
 	Query  interface{} `json:"query,omitempty"` // Query can be AndOperator, FieldOperand, SearchWorkspacesOperand, FeatureFilter, or PolicyFilter
