@@ -308,8 +308,9 @@ type OrganizationUserSearchParams struct {
 
 // OrganizationGetUsersV2Params represents the parameters for getting users in an organization
 type OrganizationGetUsersV2Params struct {
-	Cursor string `json:"cursor,omitempty"`
-	Limit  int    `json:"limit,omitempty"`
+	Cursor  string `json:"cursor,omitempty"`
+	Limit   int    `json:"limit,omitempty"`
+	GroupId string `json:"groupId,omitempty"`
 }
 
 // OrganizationUserSearchPage represents the response from searching users in an organization
