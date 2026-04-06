@@ -468,12 +468,18 @@ func (i *internalOrganizationImpl) GetUsersV2(ctx context.Context, organizationI
 	endpoint := fmt.Sprintf("admin/v2/orgs/%v/directories/%v/users", organizationID, directoryID)
 
 	if params != nil {
-		if params.Cursor != "" && params.Limit != 0 {
-			endpoint = fmt.Sprintf("%v?cursor=%v&limit=%v", endpoint, params.Cursor, params.Limit)
-		} else if params.Cursor != "" {
-			endpoint = fmt.Sprintf("%v?cursor=%v", endpoint, params.Cursor)
-		} else if params.Limit != 0 {
-			endpoint = fmt.Sprintf("%v?limit=%v", endpoint, params.Limit)
+		query := url.Values{}
+		if params.Cursor != "" {
+			query.Add("cursor", params.Cursor)
+		}
+		if params.Limit != 0 {
+			query.Add("limit", strconv.Itoa(params.Limit))
+		}
+		if params.GroupId != "" {
+			query.Add("groupIds", params.GroupId)
+		}
+		if len(query) > 0 {
+			endpoint = fmt.Sprintf("%v?%v", endpoint, query.Encode())
 		}
 	}
 
