@@ -476,6 +476,26 @@ type OrganizationGroupV2MgmtAccess struct {
 	Readable   bool `json:"readable,omitempty"`
 }
 
+// OrganizationGroupRoleAssignmentsV2Page represents a page of role assignments for a group from the v2 directory endpoint
+//
+// GET /admin/v2/orgs/{organizationID}/directories/{directoryID}/groups/{groupID}/role-assignments
+type OrganizationGroupRoleAssignmentsV2Page struct {
+	Data  []OrganizationGroupRoleAssignmentV2 `json:"data,omitempty"`
+	Links struct {
+		Next *string `json:"next,omitempty"`
+		Prev *string `json:"prev,omitempty"`
+		Self string  `json:"self,omitempty"`
+	} `json:"links,omitempty"`
+}
+
+// OrganizationGroupRoleAssignmentV2 represents a role assignment for a group
+type OrganizationGroupRoleAssignmentV2 struct {
+	ResourceID    string   `json:"resourceId,omitempty"`
+	ResourceOwner string   `json:"resourceOwner,omitempty"`
+	DefaultRole   string   `json:"defaultRole,omitempty"`
+	Roles         []string `json:"roles,omitempty"`
+}
+
 // WorkspaceSearchParams represents the parameters for searching workspaces in an organization
 type WorkspaceSearchParams struct {
 	Query  interface{} `json:"query,omitempty"` // Query can be AndOperator, FieldOperand, SearchWorkspacesOperand, FeatureFilter, or PolicyFilter

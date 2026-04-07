@@ -145,6 +145,15 @@ func (o *OrganizationService) GetGroupsV2(ctx context.Context, organizationID st
 	return o.internalClient.GetGroupsV2(ctx, organizationID, directoryID, params)
 }
 
+// GetGroupRoleAssignmentsV2 returns the role assignments for a group in an organization via the v2 directory endpoint.
+//
+// GET /admin/v2/orgs/{organizationID}/directories/{directoryID}/groups/{groupID}/role-assignments
+//
+// https://developer.atlassian.com/cloud/admin/organization/rest/api-group-groups/#api-v2-orgs-orgid-directories-directoryid-groups-groupid-role-assignments-get
+func (o *OrganizationService) GetGroupRoleAssignmentsV2(ctx context.Context, organizationID, directoryID, groupID string, params *model.OrganizationGetGroupsV2Params) (*model.OrganizationGroupRoleAssignmentsV2Page, *model.ResponseScheme, error) {
+	return o.internalClient.GetGroupRoleAssignmentsV2(ctx, organizationID, directoryID, groupID, params)
+}
+
 // SearchWorkspaces searches for workspaces within an organization with the specified filters
 //
 // POST /v2/orgs/{organizationID}/workspaces
@@ -530,4 +539,43 @@ func (i *internalOrganizationImpl) GetGroupsV2(ctx context.Context, organization
 	}
 
 	return groups, res, nil
+}
+
+func (i *internalOrganizationImpl) GetGroupRoleAssignmentsV2(ctx context.Context, organizationID, directoryID, groupID string, params *model.OrganizationGetGroupsV2Params) (*model.OrganizationGroupRoleAssignmentsV2Page, *model.ResponseScheme, error) {
+	if organizationID == "" {
+		return nil, nil, model.ErrNoAdminOrganization
+	}
+
+	if directoryID == "" {
+		return nil, nil, model.ErrNoAdminDirectoryID
+	}
+
+	if groupID == "" {
+		return nil, nil, model.ErrNoAdminGroupID
+	}
+
+	endpoint := fmt.Sprintf("admin/v2/orgs/%v/directories/%v/groups/%v/role-assignments", organizationID, directoryID, groupID)
+
+	if params != nil {
+		if params.Cursor != "" && params.Limit != 0 {
+			endpoint = fmt.Sprintf("%v?cursor=%v&limit=%v", endpoint, params.Cursor, params.Limit)
+		} else if params.Cursor != "" {
+			endpoint = fmt.Sprintf("%v?cursor=%v", endpoint, params.Cursor)
+		} else if params.Limit != 0 {
+			endpoint = fmt.Sprintf("%v?limit=%v", endpoint, params.Limit)
+		}
+	}
+
+	req, err := i.c.NewRequest(ctx, http.MethodGet, endpoint, "", nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	roleAssignments := new(model.OrganizationGroupRoleAssignmentsV2Page)
+	res, err := i.c.Call(req, roleAssignments)
+	if err != nil {
+		return nil, res, err
+	}
+
+	return roleAssignments, res, nil
 }

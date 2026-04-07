@@ -1681,3 +1681,148 @@ func Test_internalOrganizationImpl_GetGroupsV2(t *testing.T) {
 		})
 	}
 }
+
+func Test_internalOrganizationImpl_GetGroupRoleAssignmentsV2(t *testing.T) {
+
+	type fields struct {
+		c service.Connector
+	}
+
+	type args struct {
+		ctx            context.Context
+		organizationID string
+		directoryID    string
+		groupID        string
+		params         *model.OrganizationGetGroupsV2Params
+	}
+
+	testCases := []struct {
+		name    string
+		fields  fields
+		args    args
+		on      func(*fields)
+		wantErr bool
+		Err     error
+	}{
+		{
+			name: "when the parameters are correct",
+			args: args{
+				ctx:            context.Background(),
+				organizationID: "organization-sample-uuid",
+				directoryID:    "directory-sample-uuid",
+				groupID:        "group-sample-uuid",
+				params: &model.OrganizationGetGroupsV2Params{
+					Cursor: "cursor-sample-uuid",
+					Limit:  20,
+				},
+			},
+			on: func(fields *fields) {
+				client := mocks.NewConnector(t)
+
+				client.On("NewRequest",
+					context.Background(),
+					http.MethodGet,
+					"admin/v2/orgs/organization-sample-uuid/directories/directory-sample-uuid/groups/group-sample-uuid/role-assignments?cursor=cursor-sample-uuid&limit=20",
+					"",
+					nil).
+					Return(&http.Request{}, nil)
+
+				client.On("Call",
+					&http.Request{},
+					&model.OrganizationGroupRoleAssignmentsV2Page{}).
+					Return(&model.ResponseScheme{}, nil)
+
+				fields.c = client
+			},
+		},
+
+		{
+			name: "when the organization id is not provided",
+			args: args{
+				ctx:            context.Background(),
+				organizationID: "",
+				directoryID:    "directory-sample-uuid",
+				groupID:        "group-sample-uuid",
+			},
+			wantErr: true,
+			Err:     model.ErrNoAdminOrganization,
+		},
+
+		{
+			name: "when the directory id is not provided",
+			args: args{
+				ctx:            context.Background(),
+				organizationID: "organization-sample-uuid",
+				directoryID:    "",
+				groupID:        "group-sample-uuid",
+			},
+			wantErr: true,
+			Err:     model.ErrNoAdminDirectoryID,
+		},
+
+		{
+			name: "when the group id is not provided",
+			args: args{
+				ctx:            context.Background(),
+				organizationID: "organization-sample-uuid",
+				directoryID:    "directory-sample-uuid",
+				groupID:        "",
+			},
+			wantErr: true,
+			Err:     model.ErrNoAdminGroupID,
+		},
+
+		{
+			name: "when the http request cannot be created",
+			args: args{
+				ctx:            context.Background(),
+				organizationID: "organization-sample-uuid",
+				directoryID:    "directory-sample-uuid",
+				groupID:        "group-sample-uuid",
+				params: &model.OrganizationGetGroupsV2Params{
+					Cursor: "cursor-sample-uuid",
+					Limit:  20,
+				},
+			},
+			on: func(fields *fields) {
+				client := mocks.NewConnector(t)
+
+				client.On("NewRequest",
+					context.Background(),
+					http.MethodGet,
+					"admin/v2/orgs/organization-sample-uuid/directories/directory-sample-uuid/groups/group-sample-uuid/role-assignments?cursor=cursor-sample-uuid&limit=20",
+					"",
+					nil).
+					Return(&http.Request{}, errors.New("error, unable to create the http request"))
+
+				fields.c = client
+			},
+			wantErr: true,
+			Err:     errors.New("error, unable to create the http request"),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+
+			if testCase.on != nil {
+				testCase.on(&testCase.fields)
+			}
+
+			newOrganizationService := NewOrganizationService(testCase.fields.c, nil, nil, nil, nil)
+
+			gotResult, gotResponse, err := newOrganizationService.GetGroupRoleAssignmentsV2(testCase.args.ctx, testCase.args.organizationID, testCase.args.directoryID, testCase.args.groupID, testCase.args.params)
+
+			if testCase.wantErr {
+				if err != nil {
+					t.Logf("error returned: %v", err.Error())
+				}
+				assert.EqualError(t, err, testCase.Err.Error())
+			} else {
+				assert.NoError(t, err)
+				assert.NotEqual(t, gotResponse, nil)
+				assert.NotEqual(t, gotResult, nil)
+			}
+		})
+	}
+}
