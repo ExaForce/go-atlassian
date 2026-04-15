@@ -65,6 +65,11 @@ func TestClient_Call(t *testing.T) {
 		},
 	}
 
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "http://test.com", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	type fields struct {
 		HTTP    common.HTTPClient
 		Site    *url.URL
@@ -94,13 +99,13 @@ func TestClient_Call(t *testing.T) {
 
 				client := mocks.NewHTTPClient(t)
 
-				client.On("Do", (*http.Request)(nil)).
+				client.On("Do", req).
 					Return(expectedResponse, nil)
 
 				fields.HTTP = client
 			},
 			args: args{
-				request:   nil,
+				request:   req,
 				structure: nil,
 			},
 			want: &model.ResponseScheme{
@@ -118,13 +123,13 @@ func TestClient_Call(t *testing.T) {
 
 				client := mocks.NewHTTPClient(t)
 
-				client.On("Do", (*http.Request)(nil)).
+				client.On("Do", req).
 					Return(badRequestResponse, nil)
 
 				fields.HTTP = client
 			},
 			args: args{
-				request:   nil,
+				request:   req,
 				structure: nil,
 			},
 			want: &model.ResponseScheme{
@@ -143,13 +148,13 @@ func TestClient_Call(t *testing.T) {
 
 				client := mocks.NewHTTPClient(t)
 
-				client.On("Do", (*http.Request)(nil)).
+				client.On("Do", req).
 					Return(internalServerResponse, nil)
 
 				fields.HTTP = client
 			},
 			args: args{
-				request:   nil,
+				request:   req,
 				structure: nil,
 			},
 			want: &model.ResponseScheme{
@@ -168,13 +173,13 @@ func TestClient_Call(t *testing.T) {
 
 				client := mocks.NewHTTPClient(t)
 
-				client.On("Do", (*http.Request)(nil)).
+				client.On("Do", req).
 					Return(notFoundResponse, nil)
 
 				fields.HTTP = client
 			},
 			args: args{
-				request:   nil,
+				request:   req,
 				structure: nil,
 			},
 			want: &model.ResponseScheme{
@@ -193,13 +198,13 @@ func TestClient_Call(t *testing.T) {
 
 				client := mocks.NewHTTPClient(t)
 
-				client.On("Do", (*http.Request)(nil)).
+				client.On("Do", req).
 					Return(unauthorizedResponse, nil)
 
 				fields.HTTP = client
 			},
 			args: args{
-				request:   nil,
+				request:   req,
 				structure: nil,
 			},
 			want: &model.ResponseScheme{
@@ -468,7 +473,7 @@ func TestClient_processResponse(t *testing.T) {
 
 func TestNew(t *testing.T) {
 
-	mockClient, err := New(http.DefaultClient, "https://ctreminiom.atlassian.net")
+	mockClient, err := New(http.DefaultClient, "https://ctreminiom.atlassian.net", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -476,9 +481,9 @@ func TestNew(t *testing.T) {
 	mockClient.Auth.SetBasicAuth("test", "test")
 	mockClient.Auth.SetUserAgent("aaa")
 
-	invalidURLClientMocked, _ := New(nil, " https://zhidao.baidu.com/special/view?id=sd&preview=1")
+	invalidURLClientMocked, _ := New(nil, " https://zhidao.baidu.com/special/view?id=sd&preview=1", nil)
 
-	noURLClientMocked, _ := New(nil, "")
+	noURLClientMocked, _ := New(nil, "", nil)
 
 	type args struct {
 		httpClient common.HTTPClient
@@ -528,7 +533,7 @@ func TestNew(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 
-			gotClient, err := New(testCase.args.httpClient, testCase.args.site)
+			gotClient, err := New(testCase.args.httpClient, testCase.args.site, nil)
 
 			if testCase.wantErr {
 

@@ -195,7 +195,7 @@ func main() {
        token = os.Getenv("TOKEN")  
     )  
   
-    atlassian, err := v3.New(nil, host)  
+    atlassian, err := v3.New(nil, host, nil)  
     if err != nil {  
        log.Fatal(err)  
     }  
