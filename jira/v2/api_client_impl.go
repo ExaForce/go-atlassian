@@ -514,7 +514,8 @@ func (c *Client) Call(request *http.Request, structure interface{}) (*models.Res
 			if delay > c.MaxRetryDelay {
 				delay = c.MaxRetryDelay
 			}
-			log.Printf("Rate limit exceeded, sleeping for %v request %v", delay, request.URL.String())
+			retryAfter := response.Header.Get("Retry-After")
+			log.Printf("Rate limit exceeded (Retry-After=%q), sleeping for %v request %v", retryAfter, delay, request.URL.String())
 
 			// Get timer
 			timer := time.NewTimer(delay)
