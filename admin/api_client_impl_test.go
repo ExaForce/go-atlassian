@@ -299,18 +299,9 @@ func TestClient_Call(t *testing.T) {
 				testCase.on(&testCase.fields)
 			}
 
-			config := &model.ClientConfig{
-				MaxRetries:        5,
-				InitialRetryDelay: 1000,
-				MaxRetryDelay:     10000,
-			}
-
 			c := &Client{
-				HTTP:              testCase.fields.HTTP,
-				Site:              testCase.fields.Site,
-				MaxRetries:        config.MaxRetries,
-				InitialRetryDelay: config.InitialRetryDelay,
-				MaxRetryDelay:     config.MaxRetryDelay,
+				HTTP: testCase.fields.HTTP,
+				Site: testCase.fields.Site,
 			}
 
 			got, err := c.Call(testCase.args.request, testCase.args.structure)
@@ -432,19 +423,10 @@ func TestClient_NewRequest(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			config := &model.ClientConfig{
-				MaxRetries:        5,
-				InitialRetryDelay: 1000,
-				MaxRetryDelay:     10000,
-			}
-
 			c := &Client{
-				HTTP:              testCase.fields.HTTP,
-				Auth:              testCase.fields.Auth,
-				Site:              testCase.fields.Site,
-				MaxRetries:        config.MaxRetries,
-				InitialRetryDelay: config.InitialRetryDelay,
-				MaxRetryDelay:     config.MaxRetryDelay,
+				HTTP: testCase.fields.HTTP,
+				Auth: testCase.fields.Auth,
+				Site: testCase.fields.Site,
 			}
 
 			got, err := c.NewRequest(
@@ -523,19 +505,10 @@ func TestClient_processResponse(t *testing.T) {
 	}
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			config := &model.ClientConfig{
-				MaxRetries:        5,
-				InitialRetryDelay: 1000,
-				MaxRetryDelay:     10000,
-			}
-
 			c := &Client{
-				HTTP:              testCase.fields.HTTP,
-				Site:              testCase.fields.Site,
-				Auth:              testCase.fields.Authentication,
-				MaxRetries:        config.MaxRetries,
-				InitialRetryDelay: config.InitialRetryDelay,
-				MaxRetryDelay:     config.MaxRetryDelay,
+				HTTP: testCase.fields.HTTP,
+				Site: testCase.fields.Site,
+				Auth: testCase.fields.Authentication,
 			}
 
 			got, err := c.processResponse(testCase.args.response, testCase.args.structure)
@@ -555,73 +528,34 @@ func TestClient_processResponse(t *testing.T) {
 }
 
 func TestNew(t *testing.T) {
-	mockClient, err := New(http.DefaultClient, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	mockClient.Auth.SetBasicAuth("test", "test")
-	mockClient.Auth.SetUserAgent("aaa")
-
-	// Create a client with custom config
-	customConfig := &model.ClientConfig{
-		MaxRetries:        10,
-		InitialRetryDelay: 2000,
-		MaxRetryDelay:     20000,
-	}
-	customClient, err := New(http.DefaultClient, customConfig)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	type args struct {
-		httpClient common.HTTPClient
-		config     *model.ClientConfig
-	}
-
 	testCases := []struct {
-		name    string
-		args    args
-		want    *Client
-		wantErr bool
-		Err     error
+		name       string
+		httpClient common.HTTPClient
+		wantErr    bool
 	}{
 		{
-			name: "when using default config",
-			args: args{
-				httpClient: http.DefaultClient,
-				config:     nil,
-			},
-			want:    mockClient,
-			wantErr: false,
+			name:       "when using default http client",
+			httpClient: http.DefaultClient,
+			wantErr:    false,
 		},
 		{
-			name: "when using custom config",
-			args: args{
-				httpClient: http.DefaultClient,
-				config:     customConfig,
-			},
-			want:    customClient,
-			wantErr: false,
+			name:       "when httpClient is nil",
+			httpClient: nil,
+			wantErr:    false,
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			gotClient, err := New(testCase.args.httpClient, testCase.args.config)
+			gotClient, err := New(testCase.httpClient)
 
 			if testCase.wantErr {
-				if err != nil {
-					t.Logf("error returned: %v", err.Error())
-				}
 				assert.Error(t, err)
-				assert.EqualError(t, err, testCase.Err.Error())
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, gotClient)
-				assert.Equal(t, testCase.want.MaxRetries, gotClient.MaxRetries)
-				assert.Equal(t, testCase.want.InitialRetryDelay, gotClient.InitialRetryDelay)
-				assert.Equal(t, testCase.want.MaxRetryDelay, gotClient.MaxRetryDelay)
+				assert.NotNil(t, gotClient.HTTP)
+				assert.NotNil(t, gotClient.Site)
 			}
 		})
 	}

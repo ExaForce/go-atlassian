@@ -478,7 +478,7 @@ func TestClient_processResponse(t *testing.T) {
 
 func TestNew(t *testing.T) {
 
-	mockClient, err := New(http.DefaultClient, "https://ctreminiom.atlassian.net", nil)
+	mockClient, err := New(http.DefaultClient, "https://ctreminiom.atlassian.net")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -486,9 +486,9 @@ func TestNew(t *testing.T) {
 	mockClient.Auth.SetBasicAuth("test", "test")
 	mockClient.Auth.SetUserAgent("aaa")
 
-	invalidURLClientMocked, _ := New(nil, " https://zhidao.baidu.com/special/view?id=sd&preview=1", nil)
+	invalidURLClientMocked, _ := New(nil, " https://zhidao.baidu.com/special/view?id=sd&preview=1")
 
-	noURLClientMocked, _ := New(nil, "", nil)
+	noURLClientMocked, _ := New(nil, "")
 
 	type args struct {
 		httpClient common.HTTPClient
@@ -538,7 +538,7 @@ func TestNew(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 
-			gotClient, err := New(testCase.args.httpClient, testCase.args.site, nil)
+			gotClient, err := New(testCase.args.httpClient, testCase.args.site)
 
 			if testCase.wantErr {
 
