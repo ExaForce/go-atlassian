@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -507,22 +508,31 @@ func (c *Client) Call(request *http.Request, structure interface{}) (*models.Res
 			return nil, err
 		}
 
-		// If rate limit exceeded, sleep with exponential backoff
+		// If rate limit exceeded, honor Retry-After or fall back to exponential backoff
 		if response.StatusCode == http.StatusTooManyRequests {
-			delay := c.InitialRetryDelay
-			// Use bit shifting for exponential backoff (1 << retryCount)
-			delay = delay * (1 << uint(retryCount))
-			if delay > c.MaxRetryDelay {
-				delay = c.MaxRetryDelay
-			}
 			h := response.Header
-			log.Printf("Rate limit exceeded (Retry-After=%q X-RateLimit-Limit=%q X-RateLimit-Remaining=%q X-RateLimit-Reset=%q RateLimit-Reason=%q), sleeping for %v request %v",
-				h.Get("Retry-After"),
+			retryAfterRaw := h.Get("Retry-After")
+
+			var delay time.Duration
+			var delaySource string
+			if secs, err := strconv.Atoi(retryAfterRaw); err == nil && secs > 0 {
+				delay = time.Duration(secs) * time.Second
+				delaySource = "Retry-After"
+			} else {
+				delay = c.InitialRetryDelay * (1 << uint(retryCount))
+				if delay > c.MaxRetryDelay {
+					delay = c.MaxRetryDelay
+				}
+				delaySource = "backoff"
+			}
+
+			log.Printf("Rate limit exceeded (Retry-After=%q X-RateLimit-Limit=%q X-RateLimit-Remaining=%q X-RateLimit-Reset=%q RateLimit-Reason=%q), sleeping for %v (source=%s) request %v",
+				retryAfterRaw,
 				h.Get("X-RateLimit-Limit"),
 				h.Get("X-RateLimit-Remaining"),
 				h.Get("X-RateLimit-Reset"),
 				h.Get("RateLimit-Reason"),
-				delay, request.URL.String())
+				delay, delaySource, request.URL.String())
 
 			// Get timer
 			timer := time.NewTimer(delay)
