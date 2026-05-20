@@ -65,6 +65,8 @@ func New(httpClient common.HTTPClient, site string, config *models.ClientConfig)
 		internal.NewProjectService(client),
 	)
 
+	client.User = internal.NewUserService(client)
+
 	return client, nil
 }
 
@@ -77,6 +79,7 @@ type Client struct {
 	MaxRetryDelay     time.Duration
 	Auth              common.Authentication
 	Workspace         *internal.WorkspaceService
+	User              *internal.UserService
 }
 
 // NewRequest creates an API request.
