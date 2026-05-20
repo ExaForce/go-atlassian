@@ -175,4 +175,5 @@ var (
 	ErrNoWebhookID                    = errors.New("bitbucket: no webhook id set")
 	ErrNoRepository                   = errors.New("bitbucket: no repository set")
 	ErrNoPipelineUUID                 = errors.New("bitbucket: no pipeline uuid set")
+	ErrNoSelectedUser                 = errors.New("bitbucket: no selected user set")
 )
