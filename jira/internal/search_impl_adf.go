@@ -48,11 +48,11 @@ func (s *SearchADFService) Post(ctx context.Context, jql string, fields, expands
 
 // GetByJQLSearch search issues using JQL query under the HTTP Method GET
 //
-// GET /rest/api/3/search/jql?jql=jql&fields=fields&failFast=failFast
+// GET /rest/api/3/search/jql?jql=jql&fields=fields&failFast=failFast&maxResults=maxResults&nextPageToken=nextPageToken
 //
 // https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-jql-get
-func (s *SearchADFService) GetByJQLSearch(ctx context.Context, jql string, fields string, failFast bool, nextPageToken string) (*model.IssueSearchJQLScheme, *model.ResponseScheme, error) {
-	return s.internalClient.GetByJQLSearch(ctx, jql, fields, failFast, nextPageToken)
+func (s *SearchADFService) GetByJQLSearch(ctx context.Context, jql string, fields string, failFast bool, maxResults int, nextPageToken string) (*model.IssueSearchJQLScheme, *model.ResponseScheme, error) {
+	return s.internalClient.GetByJQLSearch(ctx, jql, fields, failFast, maxResults, nextPageToken)
 }
 
 type internalSearchADFImpl struct {
@@ -117,7 +117,7 @@ func (i *internalSearchADFImpl) Get(ctx context.Context, jql string, fields, exp
 	return issues, response, nil
 }
 
-func (i *internalSearchADFImpl) GetByJQLSearch(ctx context.Context, jql string, fields string, failFast bool, nextPageToken string) (*model.IssueSearchJQLScheme, *model.ResponseScheme, error) {
+func (i *internalSearchADFImpl) GetByJQLSearch(ctx context.Context, jql string, fields string, failFast bool, maxResults int, nextPageToken string) (*model.IssueSearchJQLScheme, *model.ResponseScheme, error) {
 
 	if jql == "" {
 		return nil, nil, model.ErrNoJQL
@@ -127,12 +127,14 @@ func (i *internalSearchADFImpl) GetByJQLSearch(ctx context.Context, jql string, 
 	params.Add("jql", jql)
 	params.Add("fields", fields)
 	params.Add("failFast", strconv.FormatBool(failFast))
+	if maxResults > 0 {
+		params.Add("maxResults", strconv.Itoa(maxResults))
+	}
 	if nextPageToken != "" {
 		params.Add("nextPageToken", nextPageToken)
 	}
 
 	endpoint := fmt.Sprintf("rest/api/%v/search/jql?%v", i.version, params.Encode())
-	fmt.Println("endpoint get by jql search", endpoint)
 
 	request, err := i.c.NewRequest(ctx, http.MethodGet, endpoint, "", nil)
 	if err != nil {
