@@ -46,10 +46,13 @@ type SearchADFConnector interface {
 
 	// GetByJQLSearch search issues using JQL query under the HTTP Method GET
 	//
-	// GET /rest/api/3/search/jql?jql=jql&fields=fields&failFast=failFast&nextPageToken=nextPageToken
+	// GET /rest/api/3/search/jql?jql=jql&fields=fields&failFast=failFast&maxResults=maxResults&nextPageToken=nextPageToken
+	//
+	// maxResults is the maximum number of items to return per page (the API caps this at 5000). Pass 0 to let the
+	// server apply its default page size.
 	//
 	// https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-jql-get
-	GetByJQLSearch(ctx context.Context, jql string, fields string, failFast bool, nextPageToken string) (*model.IssueSearchJQLScheme, *model.ResponseScheme, error)
+	GetByJQLSearch(ctx context.Context, jql string, fields string, failFast bool, maxResults int, nextPageToken string) (*model.IssueSearchJQLScheme, *model.ResponseScheme, error)
 
 	// Post search issues using JQL query under the HTTP Method POST
 	//
