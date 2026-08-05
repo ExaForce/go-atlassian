@@ -221,6 +221,11 @@ type OrganizationEventObjectModel struct {
 		Self string `json:"self,omitempty"` // Link to the object itself.
 		Alt  string `json:"alt,omitempty"`  // Alternative link to the object.
 	} `json:"links,omitempty"` // Links related to the object.
+	// Attributes holds the nested per-object attributes that the events API returns on
+	// context/container entries (for example authenticationType, userClientDomain, product,
+	// toolName on a "users" context entry, or siteName/siteHostName on a "sites" entry). The
+	// key set varies by object type, so it is kept as a free-form map.
+	Attributes map[string]interface{} `json:"attributes,omitempty"` // The attributes of the object.
 }
 
 // OrganizationEventLocationModel represents the location of an event.
