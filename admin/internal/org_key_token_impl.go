@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strconv"
 
 	model "github.com/ctreminiom/go-atlassian/v2/pkg/infra/models"
 	"github.com/ctreminiom/go-atlassian/v2/service"
@@ -58,10 +60,7 @@ func (i *internalOrgKeyImpl) Gets(ctx context.Context, orgID string, params *mod
 		return nil, nil, model.ErrNoAdminOrganization
 	}
 
-	endpoint := fmt.Sprintf("admin/api-access/v1/orgs/%v/api-keys", orgID)
-	if params != nil && (params.PageSize > 0 || params.Cursor != "") {
-		endpoint = fmt.Sprintf("%v?pageSize=%v&cursor=%v", endpoint, params.PageSize, params.Cursor)
-	}
+	endpoint := withOrgKeyTokenQuery(fmt.Sprintf("admin/api-access/v1/orgs/%v/api-keys", orgID), params)
 
 	request, err := i.c.NewRequest(ctx, http.MethodGet, endpoint, "", nil)
 	if err != nil {
@@ -83,11 +82,7 @@ func (i *internalOrgTokenImpl) Gets(ctx context.Context, orgID string, params *m
 		return nil, nil, model.ErrNoAdminOrganization
 	}
 
-	endpoint := fmt.Sprintf("admin/api-access/v1/orgs/%v/api-tokens", orgID)
-
-	if params != nil && (params.PageSize > 0 || params.Cursor != "") {
-		endpoint = fmt.Sprintf("%v?pageSize=%v&cursor=%v", endpoint, params.PageSize, params.Cursor)
-	}
+	endpoint := withOrgKeyTokenQuery(fmt.Sprintf("admin/api-access/v1/orgs/%v/api-tokens", orgID), params)
 
 	request, err := i.c.NewRequest(ctx, http.MethodGet, endpoint, "", nil)
 	if err != nil {
@@ -101,4 +96,24 @@ func (i *internalOrgTokenImpl) Gets(ctx context.Context, orgID string, params *m
 	}
 
 	return tokens, response, nil
+}
+
+// withOrgKeyTokenQuery adds only the parameters that are set: the API rejects an empty cursor.
+func withOrgKeyTokenQuery(endpoint string, params *model.OrgTokenQueryParams) string {
+	if params == nil {
+		return endpoint
+	}
+
+	query := url.Values{}
+	if params.PageSize > 0 {
+		query.Add("pageSize", strconv.Itoa(params.PageSize))
+	}
+	if params.Cursor != "" {
+		query.Add("cursor", params.Cursor)
+	}
+	if len(query) == 0 {
+		return endpoint
+	}
+
+	return fmt.Sprintf("%v?%v", endpoint, query.Encode())
 }
