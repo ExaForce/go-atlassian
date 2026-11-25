@@ -20,8 +20,9 @@ func Test_internalOrgTokenImpl_Gets(t *testing.T) {
 	}
 
 	type args struct {
-		ctx   context.Context
-		orgID string
+		ctx    context.Context
+		orgID  string
+		params *model.OrgTokenQueryParams
 	}
 
 	testCases := []struct {
@@ -37,6 +38,118 @@ func Test_internalOrgTokenImpl_Gets(t *testing.T) {
 			args: args{
 				ctx:   context.Background(),
 				orgID: "org-id-sample",
+			},
+			on: func(fields *fields) {
+
+				client := mocks.NewConnector(t)
+
+				client.On("NewRequest",
+					context.Background(),
+					http.MethodGet,
+					"admin/api-access/v1/orgs/org-id-sample/api-tokens",
+					"",
+					nil).
+					Return(&http.Request{}, nil)
+
+				client.On("Call",
+					&http.Request{},
+					mock.Anything).
+					Return(&model.ResponseScheme{}, nil)
+
+				fields.c = client
+			},
+		},
+
+		{
+			name: "when only the page size is set",
+			args: args{
+				ctx:    context.Background(),
+				orgID:  "org-id-sample",
+				params: &model.OrgTokenQueryParams{PageSize: 100},
+			},
+			on: func(fields *fields) {
+
+				client := mocks.NewConnector(t)
+
+				client.On("NewRequest",
+					context.Background(),
+					http.MethodGet,
+					"admin/api-access/v1/orgs/org-id-sample/api-tokens?pageSize=100",
+					"",
+					nil).
+					Return(&http.Request{}, nil)
+
+				client.On("Call",
+					&http.Request{},
+					mock.Anything).
+					Return(&model.ResponseScheme{}, nil)
+
+				fields.c = client
+			},
+		},
+
+		{
+			name: "when the page size and the cursor are set",
+			args: args{
+				ctx:    context.Background(),
+				orgID:  "org-id-sample",
+				params: &model.OrgTokenQueryParams{PageSize: 100, Cursor: "cursor-sample"},
+			},
+			on: func(fields *fields) {
+
+				client := mocks.NewConnector(t)
+
+				client.On("NewRequest",
+					context.Background(),
+					http.MethodGet,
+					"admin/api-access/v1/orgs/org-id-sample/api-tokens?cursor=cursor-sample&pageSize=100",
+					"",
+					nil).
+					Return(&http.Request{}, nil)
+
+				client.On("Call",
+					&http.Request{},
+					mock.Anything).
+					Return(&model.ResponseScheme{}, nil)
+
+				fields.c = client
+			},
+		},
+
+		{
+			name: "when only the cursor is set",
+			args: args{
+				ctx:    context.Background(),
+				orgID:  "org-id-sample",
+				params: &model.OrgTokenQueryParams{Cursor: "a+b/c="},
+			},
+			on: func(fields *fields) {
+
+				client := mocks.NewConnector(t)
+
+				client.On("NewRequest",
+					context.Background(),
+					http.MethodGet,
+					"admin/api-access/v1/orgs/org-id-sample/api-tokens?cursor=a%2Bb%2Fc%3D",
+					"",
+					nil).
+					Return(&http.Request{}, nil)
+
+				client.On("Call",
+					&http.Request{},
+					mock.Anything).
+					Return(&model.ResponseScheme{}, nil)
+
+				fields.c = client
+			},
+		},
+
+		{
+			name: "when the parameters are empty",
+			args: args{
+				ctx:    context.Background(),
+				orgID:  "org-id-sample",
+				params: &model.OrgTokenQueryParams{},
 			},
 			on: func(fields *fields) {
 
@@ -104,7 +217,7 @@ func Test_internalOrgTokenImpl_Gets(t *testing.T) {
 
 			newOrgTokenService := NewOrgTokenService(testCase.fields.c)
 
-			gotResult, gotResponse, err := newOrgTokenService.Gets(testCase.args.ctx, testCase.args.orgID, nil)
+			gotResult, gotResponse, err := newOrgTokenService.Gets(testCase.args.ctx, testCase.args.orgID, testCase.args.params)
 
 			if testCase.wantErr {
 
@@ -132,8 +245,9 @@ func Test_internalOrgKeyImpl_Gets(t *testing.T) {
 	}
 
 	type args struct {
-		ctx   context.Context
-		orgID string
+		ctx    context.Context
+		orgID  string
+		params *model.OrgTokenQueryParams
 	}
 
 	testCases := []struct {
@@ -149,6 +263,118 @@ func Test_internalOrgKeyImpl_Gets(t *testing.T) {
 			args: args{
 				ctx:   context.Background(),
 				orgID: "org-id-sample",
+			},
+			on: func(fields *fields) {
+
+				client := mocks.NewConnector(t)
+
+				client.On("NewRequest",
+					context.Background(),
+					http.MethodGet,
+					"admin/api-access/v1/orgs/org-id-sample/api-keys",
+					"",
+					nil).
+					Return(&http.Request{}, nil)
+
+				client.On("Call",
+					&http.Request{},
+					mock.Anything).
+					Return(&model.ResponseScheme{}, nil)
+
+				fields.c = client
+			},
+		},
+
+		{
+			name: "when only the page size is set",
+			args: args{
+				ctx:    context.Background(),
+				orgID:  "org-id-sample",
+				params: &model.OrgTokenQueryParams{PageSize: 100},
+			},
+			on: func(fields *fields) {
+
+				client := mocks.NewConnector(t)
+
+				client.On("NewRequest",
+					context.Background(),
+					http.MethodGet,
+					"admin/api-access/v1/orgs/org-id-sample/api-keys?pageSize=100",
+					"",
+					nil).
+					Return(&http.Request{}, nil)
+
+				client.On("Call",
+					&http.Request{},
+					mock.Anything).
+					Return(&model.ResponseScheme{}, nil)
+
+				fields.c = client
+			},
+		},
+
+		{
+			name: "when the page size and the cursor are set",
+			args: args{
+				ctx:    context.Background(),
+				orgID:  "org-id-sample",
+				params: &model.OrgTokenQueryParams{PageSize: 100, Cursor: "cursor-sample"},
+			},
+			on: func(fields *fields) {
+
+				client := mocks.NewConnector(t)
+
+				client.On("NewRequest",
+					context.Background(),
+					http.MethodGet,
+					"admin/api-access/v1/orgs/org-id-sample/api-keys?cursor=cursor-sample&pageSize=100",
+					"",
+					nil).
+					Return(&http.Request{}, nil)
+
+				client.On("Call",
+					&http.Request{},
+					mock.Anything).
+					Return(&model.ResponseScheme{}, nil)
+
+				fields.c = client
+			},
+		},
+
+		{
+			name: "when only the cursor is set",
+			args: args{
+				ctx:    context.Background(),
+				orgID:  "org-id-sample",
+				params: &model.OrgTokenQueryParams{Cursor: "a+b/c="},
+			},
+			on: func(fields *fields) {
+
+				client := mocks.NewConnector(t)
+
+				client.On("NewRequest",
+					context.Background(),
+					http.MethodGet,
+					"admin/api-access/v1/orgs/org-id-sample/api-keys?cursor=a%2Bb%2Fc%3D",
+					"",
+					nil).
+					Return(&http.Request{}, nil)
+
+				client.On("Call",
+					&http.Request{},
+					mock.Anything).
+					Return(&model.ResponseScheme{}, nil)
+
+				fields.c = client
+			},
+		},
+
+		{
+			name: "when the parameters are empty",
+			args: args{
+				ctx:    context.Background(),
+				orgID:  "org-id-sample",
+				params: &model.OrgTokenQueryParams{},
 			},
 			on: func(fields *fields) {
 
@@ -216,7 +442,7 @@ func Test_internalOrgKeyImpl_Gets(t *testing.T) {
 
 			newOrgKeyService := NewOrgKeyService(testCase.fields.c)
 
-			gotResult, gotResponse, err := newOrgKeyService.Gets(testCase.args.ctx, testCase.args.orgID, nil)
+			gotResult, gotResponse, err := newOrgKeyService.Gets(testCase.args.ctx, testCase.args.orgID, testCase.args.params)
 
 			if testCase.wantErr {
 
